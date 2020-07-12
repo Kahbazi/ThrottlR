@@ -1,0 +1,43 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30225.117
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{909648ED-E1F4-4DAE-A274-AEC47BE826F3}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{C3997747-D4C9-4E9F-866D-F5B6D10CD40F}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{83B05009-1BC7-4E56-8D4B-0E107CA4D45B}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ThrottlR", "src\ThrottlR\ThrottlR.csproj", "{E9557798-3499-4726-BCB7-5EB7CB4B33E7}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ThrottlR.Tests", "test\ThrottlR.Tests\ThrottlR.Tests.csproj", "{0A7C0247-AE46-4068-AE42-F955AE2A1D0E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E9557798-3499-4726-BCB7-5EB7CB4B33E7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E9557798-3499-4726-BCB7-5EB7CB4B33E7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E9557798-3499-4726-BCB7-5EB7CB4B33E7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E9557798-3499-4726-BCB7-5EB7CB4B33E7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0A7C0247-AE46-4068-AE42-F955AE2A1D0E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0A7C0247-AE46-4068-AE42-F955AE2A1D0E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0A7C0247-AE46-4068-AE42-F955AE2A1D0E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0A7C0247-AE46-4068-AE42-F955AE2A1D0E}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{E9557798-3499-4726-BCB7-5EB7CB4B33E7} = {909648ED-E1F4-4DAE-A274-AEC47BE826F3}
+		{0A7C0247-AE46-4068-AE42-F955AE2A1D0E} = {83B05009-1BC7-4E56-8D4B-0E107CA4D45B}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {2FE0A4A1-855C-4770-A84F-F1CAE18E62EF}
+	EndGlobalSection
+EndGlobal
