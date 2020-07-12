@@ -3,12 +3,12 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <PackageDescription>Throttling middleware for ASP.NET Core</PackageDescription>
-    <Authors>Arvin Kahbazi</Authors>
+    <Authors>Kahbazi</Authors>
     <AssemblyName>ThrottlR</AssemblyName>
     <PackageId>ThrottlR</PackageId>
     <PackageTags>throttlr;aspnetcore;throttle;rate-limit;endpoint</PackageTags>
     <PackageProjectUrl>https://github.com/kahbazi/ThrottlR</PackageProjectUrl>
-    <PackageLicense>http://opensource.org/licenses/MIT</PackageLicense>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/kahbazi/ThrottlR</RepositoryUrl>
     <Version>1.0.0-alpha.1</Version>
