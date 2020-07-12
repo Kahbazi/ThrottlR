@@ -7,7 +7,7 @@ namespace ThrottlR
     /// </summary>
     public readonly struct RateLimitCounter
     {
-        public RateLimitCounter(DateTime timestamp, double count)
+        public RateLimitCounter(DateTime timestamp, int count)
         {
             Timestamp = timestamp;
             Count = count;
@@ -15,6 +15,6 @@ namespace ThrottlR
 
         public DateTime Timestamp { get; }
 
-        public double Count { get; }
+        public int Count { get; }
     }
 }

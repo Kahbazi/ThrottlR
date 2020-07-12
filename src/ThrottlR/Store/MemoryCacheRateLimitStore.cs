@@ -26,7 +26,7 @@ namespace ThrottlR
                 return new ValueTask<RateLimitCounter?>(stored);
             }
 
-            return new ValueTask<RateLimitCounter?>(default(RateLimitCounter));
+            return new ValueTask<RateLimitCounter?>(default(RateLimitCounter?));
         }
 
         public ValueTask RemoveAsync(string key, CancellationToken cancellationToken)
