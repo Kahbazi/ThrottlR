@@ -1,6 +1,6 @@
 namespace ThrottlR
 {
-    public class CounterKeyBuilder : ICounterKeyBuilder
+    public class DefaultCounterKeyBuilder : ICounterKeyBuilder
     {
         public string Build(string identity, ThrottleRule rule, string policyName)
         {

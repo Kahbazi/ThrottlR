@@ -11,6 +11,11 @@ namespace ThrottlR.Tests
 
         public DateTime UtcNow { get; set; }
 
+        public void Travel(long seconds)
+        {
+            UtcNow += TimeSpan.FromSeconds(seconds);
+        }
+
         public void Travel(DateTime dateTime)
         {
             UtcNow = dateTime;

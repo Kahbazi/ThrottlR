@@ -88,10 +88,5 @@ namespace ThrottlR
 
             return null;
         }
-
-        /// <summary>
-        /// Gets or sets a value indicating whether all requests, including the rejected ones, should be stacked in this order: day, hour, min, sec
-        /// </summary>
-        public bool StackBlockedRequests { get; set; }
     }
 }

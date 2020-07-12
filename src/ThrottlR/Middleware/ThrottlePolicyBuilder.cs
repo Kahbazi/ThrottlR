@@ -32,6 +32,27 @@ namespace ThrottlR
         /// </summary>
         /// <param name="rules">The rules which the request has.</param>
         /// <returns>The current policy builder.</returns>
+        public ThrottlePolicyBuilder WithGeneralRule(TimeSpan timeWindow, double quota)
+        {
+            if (quota <= 0)
+            {
+                throw new ArgumentNullException(nameof(quota));
+            }
+
+            _policy.GeneralRules.Add(new ThrottleRule
+            {
+                TimeWindow = timeWindow,
+                Quota = quota
+            });
+
+            return this;
+        }
+
+        /// <summary>
+        /// Adds the specified <paramref name="rules"/> to the policy.
+        /// </summary>
+        /// <param name="rules">The rules which the request has.</param>
+        /// <returns>The current policy builder.</returns>
         public ThrottlePolicyBuilder WithGeneralRule(params ThrottleRule[] rules)
         {
             _ = rules ?? throw new ArgumentNullException(nameof(rules));

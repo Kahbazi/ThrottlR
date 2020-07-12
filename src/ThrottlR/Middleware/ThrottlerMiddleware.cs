@@ -12,7 +12,6 @@ namespace ThrottlR
     public class ThrottlerMiddleware
     {
         private static readonly byte[] _exceededQuoataMessage = Encoding.UTF8.GetBytes("You have exceeded your quota.");
-        private static readonly TimeSpan _oneSecond = TimeSpan.FromSeconds(1);
 
         private readonly Func<object, Task> _onResponseStartingDelegate = OnResponseStarting;
         private readonly RequestDelegate _next;
@@ -44,75 +43,80 @@ namespace ThrottlR
         {
             var endpoint = context.GetEndpoint();
 
-            var rateLimitMetadata = endpoint?.Metadata.GetMetadata<IThrottleMetadata>();
-            if (rateLimitMetadata == null)
+            var throttleMetadataList = endpoint?.Metadata.GetOrderedMetadata<IThrottleMetadata>();
+            if ((throttleMetadataList?.Count ?? 0) == 0)
             {
                 await _next.Invoke(context);
                 return;
             }
 
-            var policy = await _throttlePolicyProvider.GetPolicyAsync(rateLimitMetadata.PolicyName);
-            if (policy.Resolver == null)
+            for (var i = 0; i < throttleMetadataList.Count; i++)
             {
-                context.Response.StatusCode = StatusCodes.Status500InternalServerError;
-                return;
-            }
+                var throttleMetadata = throttleMetadataList[i];
 
-            // compute identity from request
-            var identity = await policy.Resolver.ResolveAsync(context);
-
-            // check safe list
-            if (policy.SafeList.Contains(identity))
-            {
-                await _next.Invoke(context);
-                return;
-            }
-
-            policy.SpecificRules.TryGetValue(identity, out var specificRules);
-
-            var rules = CombineRules(policy.GeneralRules, specificRules);
-
-            var rulesDict = new Dictionary<ThrottleRule, RateLimitCounter>();
-
-            for (var i = 0; i < rules.Count; i++)
-            {
-                var rule = rules[i];
-                var counterId = _counterKeyBuilder.Build(identity, rule, rateLimitMetadata.PolicyName);
-
-                // increment counter
-                var counter = await _throttlerService.ProcessRequestAsync(identity, rule, context.RequestAborted);
-
-                if (rule.Quota > 0)
+                var policy = await _throttlePolicyProvider.GetPolicyAsync(throttleMetadata.PolicyName);
+                if (policy.Resolver == null)
                 {
-                    // check if key expired
-                    if (counter.Timestamp + rule.TimeWindow < _systemClock.UtcNow)
-                    {
-                        continue;
-                    }
-
-                    // check if limit is reached
-                    if (counter.Count > rule.Quota)
-                    {
-                        LogBlockRequest(rateLimitMetadata, identity, rule, counter);
-
-                        await ReturnQuotaExceededResponse(context, rule, counter);
-
-                        return;
-                    }
+                    context.Response.StatusCode = StatusCodes.Status500InternalServerError;
+                    return;
                 }
 
-                rulesDict.Add(rule, counter);
-            }
+                // compute identity from request
+                var identity = await policy.Resolver.ResolveAsync(context);
 
-            // set X-Rate-Limit headers for the longest period
-            if (rulesDict.Count > 0)
-            {
-                var rule = rulesDict.OrderByDescending(x => x.Key.TimeWindow).FirstOrDefault();
+                // check safe list
+                if (policy.SafeList.Contains(identity))
+                {
+                    continue;
+                }
 
-                var counter = rule.Value;
-                var quotaPolicy = rule.Key;
+                policy.SpecificRules.TryGetValue(identity, out var specificRules);
 
-                context.Response.OnStarting(_onResponseStartingDelegate, (quotaPolicy, counter, context));
+                var rules = CombineRules(policy.GeneralRules, specificRules);
+
+                Dictionary<ThrottleRule, RateLimitCounter> rulesDict = null;
+
+                for (var j = 0; j < rules.Count; j++)
+                {
+                    var rule = rules[j];
+                    var counterId = _counterKeyBuilder.Build(identity, rule, throttleMetadata.PolicyName);
+
+                    // increment counter
+                    var counter = await _throttlerService.ProcessRequestAsync(counterId, rule, context.RequestAborted);
+
+                    if (rule.Quota > 0)
+                    {
+                        // check if key expired
+                        if (counter.Timestamp + rule.TimeWindow < _systemClock.UtcNow)
+                        {
+                            continue;
+                        }
+
+                        // check if limit is reached
+                        if (counter.Count > rule.Quota)
+                        {
+                            LogBlockRequest(throttleMetadata, identity, rule, counter);
+
+                            await ReturnQuotaExceededResponse(context, rule, counter);
+
+                            return;
+                        }
+                    }
+
+                    (rulesDict ?? new Dictionary<ThrottleRule, RateLimitCounter>()).Add(rule, counter);
+                }
+
+
+                // set X-Rate-Limit headers for the longest period
+                if (rulesDict?.Count > 0)
+                {
+                    var rule = rulesDict.OrderByDescending(x => x.Key.TimeWindow).FirstOrDefault();
+
+                    var counter = rule.Value;
+                    var quotaPolicy = rule.Key;
+
+                    context.Response.OnStarting(_onResponseStartingDelegate, (quotaPolicy, counter, context));
+                }
             }
 
             await _next.Invoke(context);
@@ -163,12 +167,7 @@ namespace ThrottlR
                 }
             }
 
-            limits = limits.OrderBy(l => l.TimeWindow).ToList();
-
-            if (_options.StackBlockedRequests)
-            {
-                limits.Reverse();
-            }
+            limits = limits.OrderByDescending(l => l.TimeWindow).ToList();
 
             return limits;
         }

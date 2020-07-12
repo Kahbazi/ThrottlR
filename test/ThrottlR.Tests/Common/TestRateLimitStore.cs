@@ -35,7 +35,7 @@ namespace ThrottlR.Tests
 
         public ValueTask SetAsync(string key, RateLimitCounter counter, TimeSpan? expirationTime, CancellationToken cancellationToken)
         {
-            _cache.Add(key, counter);
+            _cache[key] = counter;
             return new ValueTask();
         }
     }
