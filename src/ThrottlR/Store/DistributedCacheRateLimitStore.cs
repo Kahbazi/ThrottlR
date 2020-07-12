@@ -1,6 +1,5 @@
 using Microsoft.Extensions.Caching.Distributed;
 using System;
-using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -24,7 +23,7 @@ namespace ThrottlR
                 options.SetAbsoluteExpiration(expirationTime.Value);
             }
 
-            await _cache.SetStringAsync(key, JsonSerializer.Serialize(counter), options, cancellationToken);
+            await _cache.SetStringAsync(key, Serialize(counter), options, cancellationToken);
         }
 
         public async ValueTask<bool> ExistsAsync(string key, CancellationToken cancellationToken)
@@ -40,10 +39,32 @@ namespace ThrottlR
 
             if (!string.IsNullOrEmpty(stored))
             {
-                return JsonSerializer.Deserialize<RateLimitCounter>(stored);
+                return Deserialize(stored);
             }
 
             return default;
+        }
+
+        private static string Serialize(RateLimitCounter counter)
+        {
+            return $"{counter.Timestamp.Ticks},{counter.Count}";
+        }
+
+        private static RateLimitCounter? Deserialize(string stored)
+        {
+            try
+            {
+                var items = stored.Split(',');
+
+                var timestamp = new DateTime(Convert.ToInt64(items[0]));
+                var count = Convert.ToInt32(items[1]);
+
+                return new RateLimitCounter(timestamp, count);
+            }
+            catch
+            {
+                return default;
+            }
         }
 
         public async ValueTask RemoveAsync(string key, CancellationToken cancellationToken)
