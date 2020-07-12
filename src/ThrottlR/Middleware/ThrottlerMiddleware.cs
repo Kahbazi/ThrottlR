@@ -16,14 +16,12 @@ namespace ThrottlR
         private readonly Func<object, Task> _onResponseStartingDelegate = OnResponseStarting;
         private readonly RequestDelegate _next;
         private readonly IThrottlerService _throttlerService;
-        private readonly ThrottleOptions _options;
         private readonly IThrottlePolicyProvider _throttlePolicyProvider;
         private readonly ICounterKeyBuilder _counterKeyBuilder;
         private readonly ISystemClock _systemClock;
         private readonly ILogger<ThrottlerMiddleware> _logger;
 
         public ThrottlerMiddleware(RequestDelegate next,
-            IOptions<ThrottleOptions> options,
             IThrottlerService throttlerService,
             IThrottlePolicyProvider throttlePolicyProvider,
             ICounterKeyBuilder counterKeyBuilder,
@@ -31,7 +29,6 @@ namespace ThrottlR
             ILogger<ThrottlerMiddleware> logger)
         {
             _next = next;
-            _options = options.Value;
             _throttlerService = throttlerService;
             _throttlePolicyProvider = throttlePolicyProvider;
             _counterKeyBuilder = counterKeyBuilder;

@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -16,7 +15,7 @@ namespace ThrottlR
         public async Task Skips_When_There_Is_No_Endpoint()
         {
             // Arrange
-            var (next, timeMachine, throttleOptions, middleware, context) = Create();
+            var (next, _, _, middleware, context) = Create();
 
             // Act
             await middleware.Invoke(context);
@@ -30,7 +29,7 @@ namespace ThrottlR
         public async Task Skips_When_There_Is_No_ThrottleMetadata()
         {
             // Arrange
-            var (next, timeMachine, throttleOptions, middleware, context) = Create();
+            var (next, _, _, middleware, context) = Create();
 
             var endpoint = CreateEndpoint();
             context.SetEndpoint(endpoint);
@@ -47,7 +46,7 @@ namespace ThrottlR
         public async Task Returns_500_When_There_Is_No_Resolver()
         {
             // Arrange
-            var (next, timeMachine, throttleOptions, middleware, context) = Create();
+            var (next, _, throttleOptions, middleware, context) = Create();
 
             var endpoint = CreateEndpoint(new ThrottleMetadata());
             context.SetEndpoint(endpoint);
@@ -184,16 +183,16 @@ namespace ThrottlR
         private (Result next, TimeMachine timeMachine, ThrottleOptions throttleOptions, ThrottlerMiddleware middleware, HttpContext context) Create()
         {
             var result = new Result { Called = false };
-            RequestDelegate next = context =>
+            Task Next(HttpContext context)
             {
                 result.Called = true;
                 return Task.CompletedTask;
-            };
+            }
 
             var timeMachine = new TimeMachine();
             var throttleOptions = new ThrottleOptions();
 
-            var middleware = CreateMiddleware(throttleOptions, timeMachine, next);
+            var middleware = CreateMiddleware(throttleOptions, timeMachine, Next);
 
             var context = new DefaultHttpContext();
             var endpoint = CreateEndpoint();
@@ -218,7 +217,7 @@ namespace ThrottlR
             var throttlerService = CreateThrottleService(timeMachine);
             var throttlePolicyProvider = new DefaultThrottlePolicyProvider(options);
             var counterKeyBuilder = new DefaultCounterKeyBuilder();
-            var middleware = new ThrottlerMiddleware(next, options, throttlerService, throttlePolicyProvider, counterKeyBuilder, timeMachine, NullLogger<ThrottlerMiddleware>.Instance);
+            var middleware = new ThrottlerMiddleware(next, throttlerService, throttlePolicyProvider, counterKeyBuilder, timeMachine, NullLogger<ThrottlerMiddleware>.Instance);
 
             return middleware;
         }

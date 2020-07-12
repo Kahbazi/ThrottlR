@@ -14,14 +14,14 @@ namespace ThrottlR
             _cache = cache;
         }
 
-        public ValueTask<bool> ExistsAsync(string id, CancellationToken cancellationToken)
+        public ValueTask<bool> ExistsAsync(string key, CancellationToken cancellationToken)
         {
-            return new ValueTask<bool>(_cache.TryGetValue(id, out _));
+            return new ValueTask<bool>(_cache.TryGetValue(key, out _));
         }
 
-        public ValueTask<RateLimitCounter?> GetAsync(string id, CancellationToken cancellationToken)
+        public ValueTask<RateLimitCounter?> GetAsync(string key, CancellationToken cancellationToken)
         {
-            if (_cache.TryGetValue(id, out RateLimitCounter stored))
+            if (_cache.TryGetValue(key, out RateLimitCounter stored))
             {
                 return new ValueTask<RateLimitCounter?>(stored);
             }
@@ -29,14 +29,14 @@ namespace ThrottlR
             return new ValueTask<RateLimitCounter?>(default(RateLimitCounter));
         }
 
-        public ValueTask RemoveAsync(string id, CancellationToken cancellationToken)
+        public ValueTask RemoveAsync(string key, CancellationToken cancellationToken)
         {
-            _cache.Remove(id);
+            _cache.Remove(key);
 
             return new ValueTask();
         }
 
-        public ValueTask SetAsync(string id, RateLimitCounter entry, TimeSpan? expirationTime, CancellationToken cancellationToken)
+        public ValueTask SetAsync(string key, RateLimitCounter counter, TimeSpan? expirationTime, CancellationToken cancellationToken)
         {
             var options = new MemoryCacheEntryOptions
             {
@@ -48,7 +48,7 @@ namespace ThrottlR
                 options.SetAbsoluteExpiration(expirationTime.Value);
             }
 
-            _cache.Set(id, entry, options);
+            _cache.Set(key, counter, options);
 
             return new ValueTask();
         }

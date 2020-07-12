@@ -15,7 +15,7 @@ namespace ThrottlR
             _cache = cache;
         }
 
-        public async ValueTask SetAsync(string id, RateLimitCounter entry, TimeSpan? expirationTime, CancellationToken cancellationToken)
+        public async ValueTask SetAsync(string key, RateLimitCounter counter, TimeSpan? expirationTime, CancellationToken cancellationToken)
         {
             var options = new DistributedCacheEntryOptions();
 
@@ -24,19 +24,19 @@ namespace ThrottlR
                 options.SetAbsoluteExpiration(expirationTime.Value);
             }
 
-            await _cache.SetStringAsync(id, JsonSerializer.Serialize(entry), options, cancellationToken);
+            await _cache.SetStringAsync(key, JsonSerializer.Serialize(counter), options, cancellationToken);
         }
 
-        public async ValueTask<bool> ExistsAsync(string id, CancellationToken cancellationToken)
+        public async ValueTask<bool> ExistsAsync(string key, CancellationToken cancellationToken)
         {
-            var stored = await _cache.GetStringAsync(id, cancellationToken);
+            var stored = await _cache.GetStringAsync(key, cancellationToken);
 
             return !string.IsNullOrEmpty(stored);
         }
 
-        public async ValueTask<RateLimitCounter?> GetAsync(string id, CancellationToken cancellationToken)
+        public async ValueTask<RateLimitCounter?> GetAsync(string key, CancellationToken cancellationToken)
         {
-            var stored = await _cache.GetStringAsync(id, cancellationToken);
+            var stored = await _cache.GetStringAsync(key, cancellationToken);
 
             if (!string.IsNullOrEmpty(stored))
             {
@@ -46,9 +46,9 @@ namespace ThrottlR
             return default;
         }
 
-        public async ValueTask RemoveAsync(string id, CancellationToken cancellationToken)
+        public async ValueTask RemoveAsync(string key, CancellationToken cancellationToken)
         {
-            await _cache.RemoveAsync(id, cancellationToken);
+            await _cache.RemoveAsync(key, cancellationToken);
         }
     }
 }
