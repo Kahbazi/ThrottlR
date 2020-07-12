@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-    <Description>Throttling middleware for ASP.NET Core</Description>
+    <PackageDescription>Throttling middleware for ASP.NET Core</PackageDescription>
     <Authors>Arvin Kahbazi</Authors>
     <AssemblyName>ThrottlR</AssemblyName>
     <PackageId>ThrottlR</PackageId>
