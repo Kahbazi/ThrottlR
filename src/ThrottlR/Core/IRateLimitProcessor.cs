@@ -4,12 +4,8 @@ using System.Threading.Tasks;
 
 namespace ThrottlR
 {
-    public interface ThrottlerService
+    public interface IThrottlerService
     {
-        List<ThrottleRule> CombineRules(IReadOnlyList<ThrottleRule> generalRules, IReadOnlyList<ThrottleRule> speceficRules);
-
-        RateLimitHeaders GetRateLimitHeaders(RateLimitCounter counter, ThrottleRule rule);
-
         Task<RateLimitCounter> ProcessRequestAsync(string counterId, ThrottleRule rule, CancellationToken cancellationToken);
     }
 }

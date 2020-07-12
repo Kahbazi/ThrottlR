@@ -2,16 +2,24 @@ using System;
 
 namespace ThrottlR
 {
+    /// <summary>
+    /// Limit the number of acceptable requests in a given time window.
+    /// </summary>
     public class ThrottleRule
     {
         /// <summary>
-        /// Rate limit period
+        /// 
         /// </summary>
-        public TimeSpan Period { get; set; }
+        public TimeSpan TimeWindow { get; set; }
 
         /// <summary>
-        /// Maximum number of requests that a client can make in a defined period
+        /// 
         /// </summary>
-        public double Limit { get; set; }
+        public double Quota { get; set; }
+
+        public override string ToString()
+        {
+            return $"{Quota};w={TimeWindow.TotalSeconds}";
+        }
     }
 }

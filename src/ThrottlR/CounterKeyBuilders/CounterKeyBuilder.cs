@@ -4,7 +4,7 @@ namespace ThrottlR
     {
         public string Build(string identity, ThrottleRule rule, string policyName)
         {
-            return $"ThrottlR:{policyName}:{rule.Period}:{identity}";
+            return $"ThrottlR:{policyName}:{rule.TimeWindow}:{identity}";
         }
     }
 }

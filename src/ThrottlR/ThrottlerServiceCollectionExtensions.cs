@@ -8,7 +8,7 @@ namespace Microsoft.Extensions.DependencyInjection
     {
         public static IServiceCollection AddThrottlR(this IServiceCollection services, Action<ThrottleOptions> configure)
         {
-            services.TryAddSingleton<ThrottlerService, RateLimitProcessor>();
+            services.TryAddSingleton<IThrottlerService, ThrottlerService>();
             services.TryAddSingleton<IThrottlePolicyProvider, DefaultThrottlePolicyProvider>();
             services.TryAddSingleton<ISystemClock, SystemClock>();
 

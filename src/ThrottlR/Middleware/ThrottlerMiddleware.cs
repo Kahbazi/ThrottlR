@@ -4,16 +4,19 @@ using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace ThrottlR
 {
     public class ThrottlerMiddleware
     {
+        private static readonly byte[] _exceededQuoataMessage = Encoding.UTF8.GetBytes("You have exceeded your quota.");
         private static readonly TimeSpan _oneSecond = TimeSpan.FromSeconds(1);
 
+        private readonly Func<object, Task> _onResponseStartingDelegate = OnResponseStarting;
         private readonly RequestDelegate _next;
-        private readonly ThrottlerService _throttlerService;
+        private readonly IThrottlerService _throttlerService;
         private readonly ThrottleOptions _options;
         private readonly IThrottlePolicyProvider _throttlePolicyProvider;
         private readonly ICounterKeyBuilder _counterKeyBuilder;
@@ -22,7 +25,7 @@ namespace ThrottlR
 
         public ThrottlerMiddleware(RequestDelegate next,
             IOptions<ThrottleOptions> options,
-            ThrottlerService rateLimitProcessor,
+            IThrottlerService throttlerService,
             IThrottlePolicyProvider throttlePolicyProvider,
             ICounterKeyBuilder counterKeyBuilder,
             ISystemClock systemClock,
@@ -30,7 +33,7 @@ namespace ThrottlR
         {
             _next = next;
             _options = options.Value;
-            _throttlerService = rateLimitProcessor;
+            _throttlerService = throttlerService;
             _throttlePolicyProvider = throttlePolicyProvider;
             _counterKeyBuilder = counterKeyBuilder;
             _systemClock = systemClock;
@@ -67,110 +70,133 @@ namespace ThrottlR
 
             policy.SpecificRules.TryGetValue(identity, out var specificRules);
 
-            var rules = _throttlerService.CombineRules(policy.GeneralRules, specificRules);
+            var rules = CombineRules(policy.GeneralRules, specificRules);
 
             var rulesDict = new Dictionary<ThrottleRule, RateLimitCounter>();
 
-            foreach (var rule in rules)
+            for (var i = 0; i < rules.Count; i++)
             {
+                var rule = rules[i];
                 var counterId = _counterKeyBuilder.Build(identity, rule, rateLimitMetadata.PolicyName);
 
                 // increment counter
-                var rateLimitCounter = await _throttlerService.ProcessRequestAsync(identity, rule, context.RequestAborted);
+                var counter = await _throttlerService.ProcessRequestAsync(identity, rule, context.RequestAborted);
 
-                if (rule.Limit > 0)
+                if (rule.Quota > 0)
                 {
                     // check if key expired
-                    if (rateLimitCounter.Timestamp + rule.Period < _systemClock.UtcNow)
+                    if (counter.Timestamp + rule.TimeWindow < _systemClock.UtcNow)
                     {
                         continue;
                     }
 
                     // check if limit is reached
-                    if (rateLimitCounter.Count > rule.Limit)
+                    if (counter.Count > rule.Quota)
                     {
-                        //compute retry after value
-                        var retryAfter = RetryAfterFrom(rateLimitCounter.Timestamp, rule);
+                        LogBlockRequest(rateLimitMetadata, identity, rule, counter);
 
-                        // log blocked request
-                        LogBlockRequest(rateLimitMetadata, identity, rule, rateLimitCounter);
-
-                        // break execution
-                        await ReturnQuotaExceededResponse(context, rule, retryAfter);
+                        await ReturnQuotaExceededResponse(context, rule, counter);
 
                         return;
                     }
                 }
-                // if limit is zero or less, block the request.
-                else
-                {
-                    // log blocked request
-                    LogBlockRequest(rateLimitMetadata, identity, rule, rateLimitCounter);
 
-                    // break execution (TimeSpan max used to represent infinity)
-                    await ReturnQuotaExceededResponse(context, rule, TimeSpan.MaxValue);
-
-                    return;
-                }
-
-                rulesDict.Add(rule, rateLimitCounter);
+                rulesDict.Add(rule, counter);
             }
 
             // set X-Rate-Limit headers for the longest period
-            if (rulesDict.Count > 0 && !_options.DisableRateLimitHeaders)
+            if (rulesDict.Count > 0)
             {
-                var rule = rulesDict.OrderByDescending(x => x.Key.Period).FirstOrDefault();
-                var headers = _throttlerService.GetRateLimitHeaders(rule.Value, rule.Key);
+                var rule = rulesDict.OrderByDescending(x => x.Key.TimeWindow).FirstOrDefault();
 
-                context.Response.OnStarting(SetRateLimitHeaders, (headers, context));
+                var counter = rule.Value;
+                var quotaPolicy = rule.Key;
+
+                context.Response.OnStarting(_onResponseStartingDelegate, (quotaPolicy, counter, context));
             }
 
             await _next.Invoke(context);
         }
 
-        public Task ReturnQuotaExceededResponse(HttpContext httpContext, ThrottleRule rule, TimeSpan retryAfter)
+        public Task ReturnQuotaExceededResponse(HttpContext httpContext, ThrottleRule quotaPolicy, RateLimitCounter counter)
         {
-            var message = $"API calls quota exceeded! maximum admitted {rule.Limit} per {rule.Period}, retry after {retryAfter}.";
+            var retryAfter = counter.Timestamp + quotaPolicy.TimeWindow;
 
-            if (!_options.DisableRateLimitHeaders)
-            {
-                httpContext.Response.Headers["Retry-After"] = $"{retryAfter:F0}";
-            }
+            httpContext.Response.Headers["Retry-After"] = retryAfter.ToString("R");
+
+            SetRateLimitHeaders(quotaPolicy, counter, httpContext);
 
             httpContext.Response.StatusCode = StatusCodes.Status429TooManyRequests;
             httpContext.Response.ContentType = "text/plain";
 
-            return httpContext.Response.WriteAsync(message);
+            return httpContext.Response.Body.WriteAsync(_exceededQuoataMessage, 0, _exceededQuoataMessage.Length);
         }
 
-        public TimeSpan RetryAfterFrom(DateTime timestamp, ThrottleRule rule)
+        public List<ThrottleRule> CombineRules(IReadOnlyList<ThrottleRule> generalRules, IReadOnlyList<ThrottleRule> speceficRules)
         {
-            var diff = timestamp + rule.Period - _systemClock.UtcNow;
+            //TODO: Reduce allocation
 
-            if (diff > _oneSecond)
+            var limits = new List<ThrottleRule>();
+
+            if (speceficRules != null)
             {
-                return diff;
+                // get the most restrictive limit for each period 
+                limits = speceficRules.GroupBy(l => l.TimeWindow)
+                    .Select(l => l.OrderBy(x => x.Quota))
+                    .Select(l => l.First())
+                    .ToList();
             }
-            else
+
+            // get the most restrictive general limit for each period 
+            var generalLimits = generalRules
+                .GroupBy(l => l.TimeWindow)
+                .Select(l => l.OrderBy(x => x.Quota))
+                .Select(l => l.First())
+                .ToList();
+
+            foreach (var generalLimit in generalLimits)
             {
-                return _oneSecond;
+                // add general rule if no specific rule is declared for the specified period
+                if (!limits.Exists(l => l.TimeWindow == generalLimit.TimeWindow))
+                {
+                    limits.Add(generalLimit);
+                }
             }
+
+            limits = limits.OrderBy(l => l.TimeWindow).ToList();
+
+            if (_options.StackBlockedRequests)
+            {
+                limits.Reverse();
+            }
+
+            return limits;
         }
 
-        private void LogBlockRequest(IThrottleMetadata rateLimitMetadata, string identity, ThrottleRule rule, RateLimitCounter rateLimitCounter)
+        private void LogBlockRequest(IThrottleMetadata rateLimitMetadata, string identity, ThrottleRule quotaPolicy, RateLimitCounter rateLimitCounter)
         {
-            _logger.LogInformation($"Request with identity {identity} has been blocked, quota {rule.Limit}/{rule.Period} exceeded by {rateLimitCounter.Count}. Blocked by policy {rateLimitMetadata.PolicyName}.");
+            _logger.LogInformation($"Request with identity `{identity}` has been blocked by policy `{rateLimitMetadata.PolicyName}`, quota `{quotaPolicy.Quota}/{quotaPolicy.TimeWindow}` exceeded by `{rateLimitCounter.Count}`.");
         }
 
-        private Task SetRateLimitHeaders(object rateLimitHeaders)
+        private static Task OnResponseStarting(object state)
         {
-            var (headers, context) = ((RateLimitHeaders headers, HttpContext context))rateLimitHeaders;
-            
-            context.Response.Headers["X-Rate-Limit-Limit"] = headers.Limit;// better be 00:10:00
-            context.Response.Headers["X-Rate-Limit-Remaining"] = headers.Remaining;
-            context.Response.Headers["X-Rate-Limit-Reset"] = headers.Reset;
+            var (quotaPolicy, counter, context) = ((ThrottleRule, RateLimitCounter, HttpContext))state;
+
+            SetRateLimitHeaders(quotaPolicy, counter, context);
 
             return Task.CompletedTask;
+        }
+
+        private static void SetRateLimitHeaders(ThrottleRule quotaPolicy, RateLimitCounter counter, HttpContext context)
+        {
+            var remaining = quotaPolicy.Quota - counter.Count;
+            context.Response.Headers["RateLimit-Remaining"] = remaining.ToString();
+
+            var limit = $"{counter.Count}, {quotaPolicy}";
+            context.Response.Headers["RateLimit-Limit"] = limit;
+
+            var reset = counter.Timestamp + quotaPolicy.TimeWindow;
+            context.Response.Headers["RateLimit-Reset"] = reset.ToString();
         }
     }
 }

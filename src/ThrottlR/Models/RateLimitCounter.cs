@@ -12,6 +12,7 @@ namespace ThrottlR
             Timestamp = timestamp;
             Count = count;
         }
+
         public DateTime Timestamp { get; }
 
         public double Count { get; }
