@@ -5,13 +5,13 @@ namespace ThrottlR
 {
     public class UsernameResolver : IResolver
     {
-        private static readonly Task<string> _anonymous = Task.FromResult("Anonymous");
+        private static readonly Task<string> _anonymous = Task.FromResult("__Anonymous__");
 
         public static UsernameResolver Instance { get; } = new UsernameResolver();
 
         public Task<string> ResolveAsync(HttpContext httpContext)
         {
-            var identity = httpContext.User.Identity;
+            var identity = httpContext.User?.Identity;
             if (identity == null || !identity.IsAuthenticated)
             {
                 return _anonymous;

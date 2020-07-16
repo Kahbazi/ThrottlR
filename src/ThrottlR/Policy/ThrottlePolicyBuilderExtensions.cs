@@ -24,6 +24,11 @@ namespace ThrottlR
             return builder.WithResolver(HostResolver.Instance);
         }
 
+        public static ThrottlePolicyBuilder WithAccessTokenResolver(this ThrottlePolicyBuilder builder)
+        {
+            return builder.WithResolver(AccessTokenResolver.Instance);
+        }
+
         public static ThrottlePolicyBuilder WithResolver<TResolver>(this ThrottlePolicyBuilder builder, IServiceProvider serviceProvider) where TResolver : IResolver
         {
             return builder.WithResolver(new TypeResolver<TResolver>(serviceProvider));

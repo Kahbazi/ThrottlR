@@ -5,7 +5,7 @@ namespace ThrottlR
 {
     public class HostResolver : IResolver
     {
-        private static readonly Task<string> _noHost = Task.FromResult("NoHost");
+        private static readonly Task<string> _noHost = Task.FromResult("__NoHost__");
 
         public static HostResolver Instance { get; } = new HostResolver();
 

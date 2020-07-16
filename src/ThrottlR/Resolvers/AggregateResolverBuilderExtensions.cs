@@ -24,6 +24,11 @@ namespace ThrottlR
             return builder.AppendResolver(HostResolver.Instance);
         }
 
+        public static AggregateResolverBuilder AppendAccessTokenResolver(this AggregateResolverBuilder builder)
+        {
+            return builder.AppendResolver(AccessTokenResolver.Instance);
+        }
+
         public static AggregateResolverBuilder AppendResolver<TResolver>(this AggregateResolverBuilder builder, IServiceProvider serviceProvider) where TResolver : IResolver
         {
             return builder.AppendResolver(new TypeResolver<TResolver>(serviceProvider));
