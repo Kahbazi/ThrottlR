@@ -5,15 +5,15 @@ using Xunit;
 
 namespace ThrottlR
 {
-    public abstract class RateLimitStoreTests
+    public abstract class CounterStoreTests
     {
         [Fact]
         public async Task Get()
         {
-            var store = CreateRateLimitStore();
+            var store = CreateCounterStore();
 
             var timestamp = DateTime.Now;
-            await store.SetAsync("myKey", new RateLimitCounter(timestamp, 12), null, CancellationToken.None);
+            await store.SetAsync("myKey", new Counter(timestamp, 12), null, CancellationToken.None);
 
 
             var counter = await store.GetAsync("myKey", CancellationToken.None);
@@ -26,7 +26,7 @@ namespace ThrottlR
         [Fact]
         public async Task Get_Null()
         {
-            var store = CreateRateLimitStore();
+            var store = CreateCounterStore();
 
             var counter = await store.GetAsync("myKey", CancellationToken.None);
 
@@ -36,10 +36,10 @@ namespace ThrottlR
         [Fact]
         public async Task Exists_True()
         {
-            var store = CreateRateLimitStore();
+            var store = CreateCounterStore();
 
             var timestamp = DateTime.Now;
-            await store.SetAsync("myKey", new RateLimitCounter(timestamp, 12), null, CancellationToken.None);
+            await store.SetAsync("myKey", new Counter(timestamp, 12), null, CancellationToken.None);
 
 
             var result = await store.ExistsAsync("myKey", CancellationToken.None);
@@ -50,10 +50,10 @@ namespace ThrottlR
         [Fact]
         public async Task Exists_False()
         {
-            var store = CreateRateLimitStore();
+            var store = CreateCounterStore();
 
             var timestamp = DateTime.Now;
-            await store.SetAsync("myKey", new RateLimitCounter(timestamp, 12), null, CancellationToken.None);
+            await store.SetAsync("myKey", new Counter(timestamp, 12), null, CancellationToken.None);
 
 
             var result = await store.ExistsAsync("anotherKey", CancellationToken.None);
@@ -64,10 +64,10 @@ namespace ThrottlR
         [Fact]
         public async Task Remove()
         {
-            var store = CreateRateLimitStore();
+            var store = CreateCounterStore();
 
             var timestamp = DateTime.Now;
-            await store.SetAsync("myKey", new RateLimitCounter(timestamp, 12), null, CancellationToken.None);
+            await store.SetAsync("myKey", new Counter(timestamp, 12), null, CancellationToken.None);
 
             var result = await store.ExistsAsync("myKey", CancellationToken.None);
 
@@ -85,15 +85,15 @@ namespace ThrottlR
         [Fact]
         public async Task Set_Multiple_Get_Each()
         {
-            var store = CreateRateLimitStore();
+            var store = CreateCounterStore();
 
             var timestamp1 = DateTime.Now;
             var count1 = 11;
-            await store.SetAsync("myKey1", new RateLimitCounter(timestamp1, count1), null, CancellationToken.None);
+            await store.SetAsync("myKey1", new Counter(timestamp1, count1), null, CancellationToken.None);
 
             var timestamp2 = DateTime.Now;
             var count2 = 12;
-            await store.SetAsync("myKey2", new RateLimitCounter(timestamp2, count2), null, CancellationToken.None);
+            await store.SetAsync("myKey2", new Counter(timestamp2, count2), null, CancellationToken.None);
 
             var counter1 = await store.GetAsync("myKey1", CancellationToken.None);
             var counter2 = await store.GetAsync("myKey2", CancellationToken.None);
@@ -110,15 +110,15 @@ namespace ThrottlR
         [Fact]
         public async Task Set_Multiple_Remove_One()
         {
-            var store = CreateRateLimitStore();
+            var store = CreateCounterStore();
 
             var timestamp1 = DateTime.Now;
             var count1 = 11;
-            await store.SetAsync("myKey1", new RateLimitCounter(timestamp1, count1), null, CancellationToken.None);
+            await store.SetAsync("myKey1", new Counter(timestamp1, count1), null, CancellationToken.None);
 
             var timestamp2 = DateTime.Now;
             var count2 = 12;
-            await store.SetAsync("myKey2", new RateLimitCounter(timestamp2, count2), null, CancellationToken.None);
+            await store.SetAsync("myKey2", new Counter(timestamp2, count2), null, CancellationToken.None);
 
             await store.RemoveAsync("myKey1", CancellationToken.None);
             
@@ -132,7 +132,7 @@ namespace ThrottlR
             Assert.Equal(timestamp2, counter2.Value.Timestamp);
         }
 
-        public abstract IRateLimitStore CreateRateLimitStore();
+        public abstract ICounterStore CreateCounterStore();
     }
 
 }

@@ -5,11 +5,11 @@ using System.Threading.Tasks;
 
 namespace ThrottlR
 {
-    public class MemoryCacheRateLimitStore : IRateLimitStore
+    public class InMemoryCacheCounterStore : ICounterStore
     {
         private readonly IMemoryCache _cache;
 
-        public MemoryCacheRateLimitStore(IMemoryCache cache)
+        public InMemoryCacheCounterStore(IMemoryCache cache)
         {
             _cache = cache;
         }
@@ -19,14 +19,14 @@ namespace ThrottlR
             return new ValueTask<bool>(_cache.TryGetValue(key, out _));
         }
 
-        public ValueTask<RateLimitCounter?> GetAsync(string key, CancellationToken cancellationToken)
+        public ValueTask<Counter?> GetAsync(string key, CancellationToken cancellationToken)
         {
-            if (_cache.TryGetValue(key, out RateLimitCounter stored))
+            if (_cache.TryGetValue(key, out Counter stored))
             {
-                return new ValueTask<RateLimitCounter?>(stored);
+                return new ValueTask<Counter?>(stored);
             }
 
-            return new ValueTask<RateLimitCounter?>(default(RateLimitCounter?));
+            return new ValueTask<Counter?>(default(Counter?));
         }
 
         public ValueTask RemoveAsync(string key, CancellationToken cancellationToken)
@@ -36,7 +36,7 @@ namespace ThrottlR
             return new ValueTask();
         }
 
-        public ValueTask SetAsync(string key, RateLimitCounter counter, TimeSpan? expirationTime, CancellationToken cancellationToken)
+        public ValueTask SetAsync(string key, Counter counter, TimeSpan? expirationTime, CancellationToken cancellationToken)
         {
             var options = new MemoryCacheEntryOptions
             {

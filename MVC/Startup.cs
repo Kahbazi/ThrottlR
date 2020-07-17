@@ -1,5 +1,6 @@
 using System;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace MVC
@@ -17,7 +18,7 @@ namespace MVC
                     policy.WithGeneralRule(TimeSpan.FromSeconds(10), 3);
                 });
             })
-            .AddInMemoryRateLimitStore();
+            .AddInMemoryCounterStore();
         }
 
         public void Configure(IApplicationBuilder app)
@@ -26,10 +27,14 @@ namespace MVC
 
             app.UseThrottler();
 
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapControllers();
-            });
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapGet("/values", context =>
+    {
+        return context.Response.WriteAsync("values");
+    })
+    .Throttle();
+});
         }
     }
 }

@@ -23,16 +23,16 @@ namespace Microsoft.Extensions.DependencyInjection
             return builder;
         }
 
-        public static IThrottlerBuilder AddInMemoryRateLimitStore(this IThrottlerBuilder builder)
+        public static IThrottlerBuilder AddInMemoryCounterStore(this IThrottlerBuilder builder)
         {
-            builder.Services.TryAddSingleton<IRateLimitStore, MemoryCacheRateLimitStore>();
+            builder.Services.TryAddSingleton<ICounterStore, InMemoryCacheCounterStore>();
 
             return builder;
         }
 
-        public static IThrottlerBuilder AddDistributedRateLimitStore(this IThrottlerBuilder builder)
+        public static IThrottlerBuilder AddDistributedCounterStore(this IThrottlerBuilder builder)
         {
-            builder.Services.TryAddSingleton<IRateLimitStore, DistributedCacheRateLimitStore>();
+            builder.Services.TryAddSingleton<ICounterStore, DistributedCacheCounterStore>();
 
             return builder;
         }

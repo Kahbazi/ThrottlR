@@ -5,24 +5,24 @@ using System.Threading.Tasks;
 
 namespace ThrottlR.Tests
 {
-    public class TestRateLimitStore : IRateLimitStore
+    public class TestCounterStore : ICounterStore
     {
-        private readonly Dictionary<string, RateLimitCounter> _cache = new Dictionary<string, RateLimitCounter>();
+        private readonly Dictionary<string, Counter> _cache = new Dictionary<string, Counter>();
 
         public ValueTask<bool> ExistsAsync(string key, CancellationToken cancellationToken)
         {
             return new ValueTask<bool>(_cache.ContainsKey(key));
         }
 
-        public ValueTask<RateLimitCounter?> GetAsync(string key, CancellationToken cancellationToken)
+        public ValueTask<Counter?> GetAsync(string key, CancellationToken cancellationToken)
         {
             if (_cache.TryGetValue(key, out var counter))
             {
-                return new ValueTask<RateLimitCounter?>(counter);
+                return new ValueTask<Counter?>(counter);
             }
             else
             {
-                return new ValueTask<RateLimitCounter?>(default(RateLimitCounter?));
+                return new ValueTask<Counter?>(default(Counter?));
             }
         }
 
@@ -32,7 +32,7 @@ namespace ThrottlR.Tests
             return new ValueTask();
         }
 
-        public ValueTask SetAsync(string key, RateLimitCounter counter, TimeSpan? expirationTime, CancellationToken cancellationToken)
+        public ValueTask SetAsync(string key, Counter counter, TimeSpan? expirationTime, CancellationToken cancellationToken)
         {
             _cache[key] = counter;
             return new ValueTask();

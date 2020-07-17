@@ -75,7 +75,7 @@ namespace ThrottlR
 
             var rules = CombineRules(policy.GeneralRules, specificRules);
 
-            Dictionary<ThrottleRule, RateLimitCounter> rulesDict = null;
+            Dictionary<ThrottleRule, Counter> rulesDict = null;
 
             for (var i = 0; i < rules.Count; i++)
             {
@@ -104,7 +104,7 @@ namespace ThrottlR
                     }
                 }
 
-                (rulesDict ?? new Dictionary<ThrottleRule, RateLimitCounter>()).Add(rule, counter);
+                (rulesDict ?? new Dictionary<ThrottleRule, Counter>()).Add(rule, counter);
             }
 
 
@@ -123,7 +123,7 @@ namespace ThrottlR
             await _next.Invoke(context);
         }
 
-        public Task ReturnQuotaExceededResponse(HttpContext httpContext, ThrottleRule quotaPolicy, RateLimitCounter counter)
+        public Task ReturnQuotaExceededResponse(HttpContext httpContext, ThrottleRule quotaPolicy, Counter counter)
         {
             var retryAfter = counter.Timestamp + quotaPolicy.TimeWindow;
 
@@ -173,21 +173,21 @@ namespace ThrottlR
             return limits;
         }
 
-        private void LogBlockRequest(IThrottleMetadata rateLimitMetadata, string identity, ThrottleRule quotaPolicy, RateLimitCounter rateLimitCounter)
+        private void LogBlockRequest(IThrottleMetadata rateLimitMetadata, string identity, ThrottleRule quotaPolicy, Counter rateLimitCounter)
         {
             _logger.LogInformation($"Request with identity `{identity}` has been blocked by policy `{rateLimitMetadata.PolicyName}`, quota `{quotaPolicy.Quota}/{quotaPolicy.TimeWindow}` exceeded by `{rateLimitCounter.Count}`.");
         }
 
         private static Task OnResponseStarting(object state)
         {
-            var (quotaPolicy, counter, context) = ((ThrottleRule, RateLimitCounter, HttpContext))state;
+            var (quotaPolicy, counter, context) = ((ThrottleRule, Counter, HttpContext))state;
 
             SetRateLimitHeaders(quotaPolicy, counter, context);
 
             return Task.CompletedTask;
         }
 
-        private static void SetRateLimitHeaders(ThrottleRule quotaPolicy, RateLimitCounter counter, HttpContext context)
+        private static void SetRateLimitHeaders(ThrottleRule quotaPolicy, Counter counter, HttpContext context)
         {
             var remaining = quotaPolicy.Quota - counter.Count;
             context.Response.Headers["RateLimit-Remaining"] = remaining.ToString();

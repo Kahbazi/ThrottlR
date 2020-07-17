@@ -5,6 +5,6 @@ namespace ThrottlR
 {
     public interface IThrottlerService
     {
-        Task<RateLimitCounter> ProcessRequestAsync(string counterId, ThrottleRule rule, CancellationToken cancellationToken);
+        Task<Counter> ProcessRequestAsync(string counterId, ThrottleRule rule, CancellationToken cancellationToken);
     }
 }

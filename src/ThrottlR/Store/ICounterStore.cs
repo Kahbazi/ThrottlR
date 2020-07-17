@@ -4,11 +4,11 @@ using System.Threading.Tasks;
 
 namespace ThrottlR
 {
-    public interface IRateLimitStore
+    public interface ICounterStore
     {
         ValueTask<bool> ExistsAsync(string key, CancellationToken cancellationToken);
-        ValueTask<RateLimitCounter?> GetAsync(string key, CancellationToken cancellationToken);
+        ValueTask<Counter?> GetAsync(string key, CancellationToken cancellationToken);
         ValueTask RemoveAsync(string key, CancellationToken cancellationToken);
-        ValueTask SetAsync(string key, RateLimitCounter counter, TimeSpan? expirationTime, CancellationToken cancellationToken);
+        ValueTask SetAsync(string key, Counter counter, TimeSpan? expirationTime, CancellationToken cancellationToken);
     }
 }

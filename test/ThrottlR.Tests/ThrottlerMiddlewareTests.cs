@@ -198,7 +198,7 @@ namespace ThrottlR
 
         private static ThrottlerService CreateThrottleService(TimeMachine timeMachine)
         {
-            var store = new TestRateLimitStore();
+            var store = new TestCounterStore();
             var throttlerService = new ThrottlerService(store, timeMachine);
 
             return throttlerService;

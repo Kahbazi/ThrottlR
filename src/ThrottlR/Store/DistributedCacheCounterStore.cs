@@ -5,16 +5,16 @@ using System.Threading.Tasks;
 
 namespace ThrottlR
 {
-    public class DistributedCacheRateLimitStore : IRateLimitStore
+    public class DistributedCacheCounterStore : ICounterStore
     {
         private readonly IDistributedCache _cache;
 
-        public DistributedCacheRateLimitStore(IDistributedCache cache)
+        public DistributedCacheCounterStore(IDistributedCache cache)
         {
             _cache = cache;
         }
 
-        public async ValueTask SetAsync(string key, RateLimitCounter counter, TimeSpan? expirationTime, CancellationToken cancellationToken)
+        public async ValueTask SetAsync(string key, Counter counter, TimeSpan? expirationTime, CancellationToken cancellationToken)
         {
             var options = new DistributedCacheEntryOptions();
 
@@ -33,7 +33,7 @@ namespace ThrottlR
             return !string.IsNullOrEmpty(stored);
         }
 
-        public async ValueTask<RateLimitCounter?> GetAsync(string key, CancellationToken cancellationToken)
+        public async ValueTask<Counter?> GetAsync(string key, CancellationToken cancellationToken)
         {
             var stored = await _cache.GetStringAsync(key, cancellationToken);
 
@@ -45,12 +45,12 @@ namespace ThrottlR
             return default;
         }
 
-        private static string Serialize(RateLimitCounter counter)
+        private static string Serialize(Counter counter)
         {
             return $"{counter.Timestamp.Ticks},{counter.Count}";
         }
 
-        private static RateLimitCounter? Deserialize(string stored)
+        private static Counter? Deserialize(string stored)
         {
             try
             {
@@ -59,7 +59,7 @@ namespace ThrottlR
                 var timestamp = new DateTime(Convert.ToInt64(items[0]));
                 var count = Convert.ToInt32(items[1]);
 
-                return new RateLimitCounter(timestamp, count);
+                return new Counter(timestamp, count);
             }
             catch
             {

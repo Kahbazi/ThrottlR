@@ -5,9 +5,9 @@ namespace ThrottlR
     /// <summary>
     /// Stores the initial access time and the numbers of calls made from that point
     /// </summary>
-    public readonly struct RateLimitCounter
+    public readonly struct Counter
     {
-        public RateLimitCounter(DateTime timestamp, int count)
+        public Counter(DateTime timestamp, int count)
         {
             Timestamp = timestamp;
             Count = count;
