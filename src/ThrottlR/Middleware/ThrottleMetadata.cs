@@ -1,4 +1,4 @@
-﻿namespace ThrottlR
+namespace ThrottlR
 {
     public class ThrottleMetadata : IThrottleMetadata
     {

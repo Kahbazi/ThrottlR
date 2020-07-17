@@ -140,43 +140,17 @@ namespace ThrottlR
         }
 
         [Fact]
-        public async Task Quota_Exceeds_In_A_Time_Windows_For_Multiple_Metadata()
+        public async Task Skips_When_There_Is_ThrottleMetadata_And_DisableThrottle()
         {
             // Arrange
-            var (next, timeMachine, throttleOptions, middleware, context) = Create();
+            var (next, _, _, middleware, context) = Create();
 
-            var endpoint = CreateEndpoint(new ThrottleMetadata("policy1"), new ThrottleMetadata("policy2"));
+            var endpoint = CreateEndpoint(new ThrottleMetadata(), new DisableThrottle());
             context.SetEndpoint(endpoint);
 
-            throttleOptions.AddPolicy("policy1", x => x.WithGeneralRule(TimeSpan.FromSeconds(4), 2));
-            throttleOptions.AddPolicy("policy2", x => x.WithGeneralRule(TimeSpan.FromSeconds(1), 1));
-
-            // 00:00:00.0
             await middleware.Invoke(context);
 
-            Assert.True(next.Called);
-
-
-            // 00:00:00.0
-            next.Called = false;
-            await middleware.Invoke(context);
-
-            Assert.False(next.Called);
-            Assert.Equal(StatusCodes.Status429TooManyRequests, context.Response.StatusCode);
-
-
-            // 00:00:01.1
-            timeMachine.Travel(TimeSpan.FromMilliseconds(1001));
-            next.Called = false;
-            await middleware.Invoke(context);
-
-            Assert.False(next.Called);
-
-            // 00:00:04.1
-            timeMachine.Travel(TimeSpan.FromMilliseconds(3000));
-            next.Called = false;
-            await middleware.Invoke(context);
-
+            // Assert
             Assert.True(next.Called);
         }
 
@@ -206,7 +180,7 @@ namespace ThrottlR
             public bool Called { get; set; }
         }
 
-        private Endpoint CreateEndpoint(params IThrottleMetadata[] throttleMetadata)
+        private Endpoint CreateEndpoint(params object[] throttleMetadata)
         {
             return new Endpoint(context => Task.CompletedTask, new EndpointMetadataCollection((IEnumerable<object>)throttleMetadata), string.Empty);
         }
