@@ -15,6 +15,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ThrottlR", "src\ThrottlR\Th
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ThrottlR.Tests", "test\ThrottlR.Tests\ThrottlR.Tests.csproj", "{0A7C0247-AE46-4068-AE42-F955AE2A1D0E}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "sample", "sample", "{760F0930-725B-404A-96D7-129BBC4E8E04}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MVC", "MVC\MVC.csproj", "{B6C5CCEA-01B4-4B7F-A855-CBF500B6E742}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -29,6 +33,10 @@ Global
 		{0A7C0247-AE46-4068-AE42-F955AE2A1D0E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0A7C0247-AE46-4068-AE42-F955AE2A1D0E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0A7C0247-AE46-4068-AE42-F955AE2A1D0E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B6C5CCEA-01B4-4B7F-A855-CBF500B6E742}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B6C5CCEA-01B4-4B7F-A855-CBF500B6E742}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B6C5CCEA-01B4-4B7F-A855-CBF500B6E742}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B6C5CCEA-01B4-4B7F-A855-CBF500B6E742}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -36,6 +44,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{E9557798-3499-4726-BCB7-5EB7CB4B33E7} = {909648ED-E1F4-4DAE-A274-AEC47BE826F3}
 		{0A7C0247-AE46-4068-AE42-F955AE2A1D0E} = {83B05009-1BC7-4E56-8D4B-0E107CA4D45B}
+		{B6C5CCEA-01B4-4B7F-A855-CBF500B6E742} = {760F0930-725B-404A-96D7-129BBC4E8E04}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {2FE0A4A1-855C-4770-A84F-F1CAE18E62EF}
