@@ -1,6 +1,6 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 
-namespace ThrottlR.Service
+namespace ThrottlR
 {
     /// <summary>
     /// Reverse Proxy builder interface.

@@ -4,6 +4,8 @@ namespace Microsoft.AspNetCore.Builder
 {
     public static class ThrottlerEndpointConventionBuilderExtensions
     {
+        private static readonly ThrottleMetadata _throttleMetadata = new ThrottleMetadata();
+
         public static TBuilder Throttle<TBuilder>(this TBuilder builder, string policy) where TBuilder : IEndpointConventionBuilder
         {
             builder.Add(endpointBuilder =>
@@ -23,7 +25,7 @@ namespace Microsoft.AspNetCore.Builder
         {
             builder.Add(endpointBuilder =>
             {
-                endpointBuilder.Metadata.Add(new ThrottleMetadata());
+                endpointBuilder.Metadata.Add(_throttleMetadata);
             });
             return builder;
         }

@@ -145,7 +145,7 @@ namespace ThrottlR
             // Arrange
             var (next, _, _, middleware, context) = Create();
 
-            var endpoint = CreateEndpoint(new ThrottleMetadata(), new DisableThrottle());
+            var endpoint = CreateEndpoint(new ThrottleMetadata(), DisableThrottle.Instance);
             context.SetEndpoint(endpoint);
 
             await middleware.Invoke(context);
