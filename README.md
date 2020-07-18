@@ -2,7 +2,7 @@
 
 [![NuGet](https://img.shields.io/nuget/vpre/ThrottlR.svg)](https://www.nuget.org/packages/ThrottlR)
 
-#### Installing ThrottlR
+#### Getting Started
 
 Install [ThrottlR](https://www.nuget.org/packages/ThrottlR) nuget package:
 
