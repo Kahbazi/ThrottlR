@@ -111,7 +111,5 @@ namespace ThrottlR
 
             return counter;
         }
-
-
     }
 }
