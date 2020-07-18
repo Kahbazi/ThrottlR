@@ -70,6 +70,18 @@ namespace ThrottlR
         /// </summary>
         /// <param name="rules">The rules which the request has.</param>
         /// <returns>The current policy builder.</returns>
+        public ThrottlePolicyBuilder WithSpecificRule(string identity, TimeSpan timeWindow, double quota)
+        {
+            WithSpecificRule(identity, new ThrottleRule { TimeWindow = timeWindow, Quota = quota });
+
+            return this;
+        }
+
+        /// <summary>
+        /// Adds the specified <paramref name="rules"/> to the policy.
+        /// </summary>
+        /// <param name="rules">The rules which the request has.</param>
+        /// <returns>The current policy builder.</returns>
         public ThrottlePolicyBuilder WithSpecificRule(string identity, params ThrottleRule[] rules)
         {
             _ = rules ?? throw new ArgumentNullException(nameof(rules));

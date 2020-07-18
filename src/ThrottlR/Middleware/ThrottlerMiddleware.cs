@@ -71,15 +71,13 @@ namespace ThrottlR
                 return;
             }
 
-            policy.SpecificRules.TryGetValue(identity, out var specificRules);
 
-            var rules = CombineRules(policy.GeneralRules, specificRules);
+            var rules = _throttlerService.GetRules(policy, identity);
 
             Dictionary<ThrottleRule, Counter> rulesDict = null;
 
-            for (var i = 0; i < rules.Count; i++)
+            foreach (var rule in rules)
             {
-                var rule = rules[i];
                 var counterId = _counterKeyBuilder.Build(identity, rule, throttleMetadata.PolicyName);
 
                 // increment counter
@@ -137,41 +135,6 @@ namespace ThrottlR
             return httpContext.Response.Body.WriteAsync(_exceededQuoataMessage, 0, _exceededQuoataMessage.Length);
         }
 
-        public List<ThrottleRule> CombineRules(IReadOnlyList<ThrottleRule> generalRules, IReadOnlyList<ThrottleRule> speceficRules)
-        {
-            //TODO: Reduce allocation
-
-            var limits = new List<ThrottleRule>();
-
-            if (speceficRules != null)
-            {
-                // get the most restrictive limit for each period 
-                limits = speceficRules.GroupBy(l => l.TimeWindow)
-                    .Select(l => l.OrderBy(x => x.Quota))
-                    .Select(l => l.First())
-                    .ToList();
-            }
-
-            // get the most restrictive general limit for each period 
-            var generalLimits = generalRules
-                .GroupBy(l => l.TimeWindow)
-                .Select(l => l.OrderBy(x => x.Quota))
-                .Select(l => l.First())
-                .ToList();
-
-            foreach (var generalLimit in generalLimits)
-            {
-                // add general rule if no specific rule is declared for the specified period
-                if (!limits.Exists(l => l.TimeWindow == generalLimit.TimeWindow))
-                {
-                    limits.Add(generalLimit);
-                }
-            }
-
-            limits = limits.OrderByDescending(l => l.TimeWindow).ToList();
-
-            return limits;
-        }
 
         private void LogBlockRequest(IThrottleMetadata rateLimitMetadata, string identity, ThrottleRule quotaPolicy, Counter rateLimitCounter)
         {
