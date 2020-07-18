@@ -18,7 +18,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ThrottlR.Tests", "test\Thro
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "sample", "sample", "{760F0930-725B-404A-96D7-129BBC4E8E04}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MVC", "MVC\MVC.csproj", "{B6C5CCEA-01B4-4B7F-A855-CBF500B6E742}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MVC", "sample\MVC\MVC.csproj", "{B6C5CCEA-01B4-4B7F-A855-CBF500B6E742}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
