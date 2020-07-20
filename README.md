@@ -13,9 +13,12 @@ dotnet add package ThrottlR
 Since ThrottlR is implemented on top of Endpoint, ThrottlR middleware needs to be added after `UseRouting()` and before `UseEndpoints()`.
 
 ```csharp
-app.UseRouting();
-app.UseThrottler();
-app.UseEndpoints(...);
+public void Configure(IApplicationBuilder app)
+{
+    app.UseRouting();
+    app.UseThrottler();
+    app.UseEndpoints(...);
+}
 ```
 
 Also add ThrottlR to `IServiceCollection`
