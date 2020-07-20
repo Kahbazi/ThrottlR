@@ -2,6 +2,7 @@ using System;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
+using ThrottlR;
 
 namespace MVC
 {
@@ -15,7 +16,11 @@ namespace MVC
             {
                 options.AddDefaultPolicy(policy =>
                 {
-                    policy.WithGeneralRule(TimeSpan.FromSeconds(10), 3);
+                    policy.WithIpResolver() // throttling is based on request ip
+                        .WithGeneralRule(TimeSpan.FromSeconds(10), 3) // 3 requests could be called every 10 seconds
+                        .WithGeneralRule(TimeSpan.FromMinutes(1), 30) // 30 requests could be called every 1 minute
+                        .WithGeneralRule(TimeSpan.FromHours(1), 500) // 500 requests could be called every 1 hour
+                        .WithSafeList("127.0.0.1", "::1"); // throttling skips "127.0.0.1" & "::1"
                 });
             })
             .AddInMemoryCounterStore();
