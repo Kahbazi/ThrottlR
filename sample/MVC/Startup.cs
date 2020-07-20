@@ -27,14 +27,14 @@ namespace MVC
 
             app.UseThrottler();
 
-app.UseEndpoints(endpoints =>
-{
-    endpoints.MapGet("/values", context =>
-    {
-        return context.Response.WriteAsync("values");
-    })
-    .Throttle();
-});
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapGet("/values", context =>
+                {
+                    return context.Response.WriteAsync("values");
+                })
+                .Throttle();
+            });
         }
     }
 }

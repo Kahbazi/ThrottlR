@@ -10,7 +10,15 @@ Install [ThrottlR](https://www.nuget.org/packages/ThrottlR) nuget package:
 dotnet add package ThrottlR
 ```
 
-Add ThrottlR to `IServiceCollection`
+Since ThrottlR is implemented on top of Endpoint, ThrottlR middleware needs to be added after `UseRouting()` and before `UseEndpoints()`.
+
+```csharp
+app.UseRouting();
+app.UseThrottler();
+app.UseEndpoints(...);
+```
+
+Also add ThrottlR to `IServiceCollection`
 
 ```csharp
 public void ConfigureServices(IServiceCollection services)
