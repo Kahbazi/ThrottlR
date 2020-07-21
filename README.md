@@ -56,22 +56,7 @@ public void ConfigureServices(IServiceCollection services)
 ```
 
 #### How to add ThrottlR on Controller
-Add `[Throttle]` Attribute to Controller class or Action.
-
-```csharp
-[Throttle]
-[ApiController]
-public class ApiController : ControllerBase
-{
-    [HttpGet("values")]
-    public string[] GetValues()
-    {
-        return new string[] { "value1", "value2" };
-    }
-}
-```
-
-You can add `[DisableThrottle]` for Action that doesn't need throttling.
+Add `[Throttle]` Attribute to Controller class or Action. You can add `[DisableThrottle]` for Action that doesn't need throttling.
 
 ```csharp
 // Throttle this controller with default policy
