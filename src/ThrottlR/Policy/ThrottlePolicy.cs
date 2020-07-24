@@ -19,5 +19,7 @@ namespace ThrottlR
         public Dictionary<string, List<ThrottleRule>> SpecificRules { get; set; }
 
         public IResolver Resolver { get; set; }
+
+        public bool ApplyPerEndpoint { get; set; }
     }
 }

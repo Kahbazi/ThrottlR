@@ -120,6 +120,17 @@ namespace ThrottlR
         }
 
         /// <summary>
+        /// 
+        /// </summary>
+        /// <returns>The current policy builder.</returns>
+        public ThrottlePolicyBuilder ApplyPerEndpoint()
+        {
+            _policy.ApplyPerEndpoint = true;
+
+            return this;
+        }
+
+        /// <summary>
         /// Builds a new <see cref="ThrottlePolicy"/> using the entries added.
         /// </summary>
         /// <returns>The constructed <see cref="ThrottlePolicy"/>.</returns>

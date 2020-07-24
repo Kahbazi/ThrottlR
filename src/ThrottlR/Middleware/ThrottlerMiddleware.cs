@@ -77,7 +77,7 @@ namespace ThrottlR
 
             foreach (var rule in rules)
             {
-                var counterId = _counterKeyBuilder.Build(identity, rule, throttleMetadata.PolicyName);
+                var counterId = _counterKeyBuilder.Build(identity, rule, throttleMetadata.PolicyName, endpoint.DisplayName);
 
                 // increment counter
                 var counter = await _throttlerService.ProcessRequestAsync(counterId, rule, context.RequestAborted);

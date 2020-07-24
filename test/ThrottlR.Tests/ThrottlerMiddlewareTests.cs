@@ -154,6 +154,49 @@ namespace ThrottlR
             Assert.True(next.Called);
         }
 
+        [Fact]
+        public async Task PerEndpointPolicy()
+        {
+            // Arrange
+            var (next, timeMachine, throttleOptions, middleware, context) = Create();
+
+            throttleOptions.AddDefaultPolicy(x => x.WithGeneralRule(TimeSpan.FromSeconds(1), 1)
+                                                   .ApplyPerEndpoint());
+
+            // 00:00:00.0
+            var endpoint1 = CreateEndpoint("Endpoint-1", new ThrottleMetadata());
+            context.SetEndpoint(endpoint1);
+
+            await middleware.Invoke(context);
+
+            Assert.True(next.Called);
+
+
+            // 00:00:00.0
+            next.Called = false;
+            await middleware.Invoke(context);
+
+            Assert.False(next.Called);
+            Assert.Equal(StatusCodes.Status429TooManyRequests, context.Response.StatusCode);
+
+
+            // 00:00:00.0
+            var endpoint2 = CreateEndpoint("Endpoint-2", new ThrottleMetadata());
+            context.SetEndpoint(endpoint2);
+
+            await middleware.Invoke(context);
+
+            Assert.True(next.Called);
+
+
+            // 00:00:00.0
+            next.Called = false;
+            await middleware.Invoke(context);
+
+            Assert.False(next.Called);
+            Assert.Equal(StatusCodes.Status429TooManyRequests, context.Response.StatusCode);
+        }
+
         private (Result next, TimeMachine timeMachine, ThrottleOptions throttleOptions, ThrottlerMiddleware middleware, HttpContext context) Create()
         {
             var result = new Result { Called = false };
@@ -182,7 +225,12 @@ namespace ThrottlR
 
         private Endpoint CreateEndpoint(params object[] throttleMetadata)
         {
-            return new Endpoint(context => Task.CompletedTask, new EndpointMetadataCollection((IEnumerable<object>)throttleMetadata), string.Empty);
+            return CreateEndpoint(string.Empty, throttleMetadata);
+        }
+
+        private Endpoint CreateEndpoint(string endpointName = "", params object[] throttleMetadata)
+        {
+            return new Endpoint(context => Task.CompletedTask, new EndpointMetadataCollection((IEnumerable<object>)throttleMetadata), endpointName);
         }
 
         public ThrottlerMiddleware CreateMiddleware(ThrottleOptions throttleOptions, TimeMachine timeMachine, RequestDelegate next)
