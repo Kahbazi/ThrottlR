@@ -83,7 +83,7 @@ namespace ThrottlR
         }
 
         [Fact]
-        public async Task Quota_Exceeds_In_A_Time_Windows()
+        public async Task Quota_Exceeds_In_A_Time_Window()
         {
             // Arrange
             var (next, timeMachine, throttleOptions, middleware, context) = Create();
@@ -103,6 +103,38 @@ namespace ThrottlR
             await middleware.Invoke(context);
 
             Assert.False(next.Called);
+            Assert.Equal(StatusCodes.Status429TooManyRequests, context.Response.StatusCode);
+            Assert.Equal("text/plain", context.Response.ContentType);
+        }
+
+        [Fact]
+        public async Task Custom_Quota_Exceeds_Delegate()
+        {
+            // Arrange
+            var (next, timeMachine, throttleOptions, middleware, context) = Create();
+
+            var endpoint = CreateEndpoint(new ThrottleMetadata());
+            context.SetEndpoint(endpoint);
+
+            var cuotaExceededDelegateCalled = false;
+            throttleOptions.AddDefaultPolicy(x => x.WithGeneralRule(TimeSpan.FromSeconds(1), 1));
+            throttleOptions.OnQuotaExceeded = (HttpContext httpContext, ThrottleRule rule, DateTime retryAfter) =>
+            {
+                cuotaExceededDelegateCalled = true;
+                return Task.CompletedTask;
+            };
+
+            await middleware.Invoke(context);
+
+            Assert.True(next.Called);
+
+            next.Called = false;
+
+
+            await middleware.Invoke(context);
+
+            Assert.False(next.Called);
+            Assert.True(cuotaExceededDelegateCalled);
             Assert.Equal(StatusCodes.Status429TooManyRequests, context.Response.StatusCode);
         }
 
@@ -239,7 +271,7 @@ namespace ThrottlR
             var throttlerService = CreateThrottleService(timeMachine);
             var throttlePolicyProvider = new DefaultThrottlePolicyProvider(options);
             var counterKeyBuilder = new DefaultCounterKeyBuilder();
-            var middleware = new ThrottlerMiddleware(next, throttlerService, throttlePolicyProvider, counterKeyBuilder, timeMachine, NullLogger<ThrottlerMiddleware>.Instance);
+            var middleware = new ThrottlerMiddleware(next, throttlerService, throttlePolicyProvider, counterKeyBuilder, options, timeMachine, NullLogger<ThrottlerMiddleware>.Instance);
 
             return middleware;
         }

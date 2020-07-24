@@ -1,11 +1,15 @@
 using System;
 using System.Collections.Generic;
+using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 
 namespace ThrottlR
 {
     public class ThrottleOptions
     {
+        private static readonly byte[] _exceededQuoataMessage = Encoding.UTF8.GetBytes("You have exceeded your quota.");
+
         private string _defaultPolicyName = "__DefaultThrottlerPolicy";
 
         internal IDictionary<string, (ThrottlePolicy policy, Task<ThrottlePolicy> policyTask)> PolicyMap { get; }
@@ -87,6 +91,14 @@ namespace ThrottlR
             }
 
             return null;
+        }
+
+        public QuotaExceededDelegate OnQuotaExceeded { get; set; } = DefaultQuotaExceededDelegate;
+
+        private static Task DefaultQuotaExceededDelegate(HttpContext httpContext, ThrottleRule rule, DateTime retryAfter)
+        {
+            httpContext.Response.ContentType = "text/plain";
+            return httpContext.Response.Body.WriteAsync(_exceededQuoataMessage, 0, _exceededQuoataMessage.Length);
         }
     }
 }
