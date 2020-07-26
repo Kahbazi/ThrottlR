@@ -10,21 +10,21 @@ namespace ThrottlR
     /// <summary>
     /// An asynchronous locker that provides read and write locking policies.
     /// </summary>
-    internal sealed class AsyncKeyLockDoorman
+    internal sealed class Doorman
     {
         private readonly Queue<TaskCompletionSource<Releaser>> _waitingWriters;
         private readonly Task<Releaser> _readerReleaser;
         private readonly Task<Releaser> _writerReleaser;
-        private readonly Action<AsyncKeyLockDoorman> _reset;
+        private readonly Action<Doorman> _reset;
         private TaskCompletionSource<Releaser> _waitingReader;
         private int _readersWaiting;
         private int _status;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="AsyncKeyLockDoorman"/> class.
+        /// Initializes a new instance of the <see cref="Doorman"/> class.
         /// </summary>
         /// <param name="reset">The reset action.</param>
-        public AsyncKeyLockDoorman(Action<AsyncKeyLockDoorman> reset)
+        public Doorman(Action<Doorman> reset)
         {
             _waitingWriters = new Queue<TaskCompletionSource<Releaser>>();
             _waitingReader = new TaskCompletionSource<Releaser>();
@@ -143,26 +143,26 @@ namespace ThrottlR
 
         public readonly struct Releaser : IDisposable
         {
-            private readonly AsyncKeyLockDoorman toRelease;
-            private readonly bool writer;
+            private readonly Doorman _toRelease;
+            private readonly bool _writer;
 
-            internal Releaser(AsyncKeyLockDoorman toRelease, bool writer)
+            internal Releaser(Doorman toRelease, bool writer)
             {
-                this.toRelease = toRelease;
-                this.writer = writer;
+                _toRelease = toRelease;
+                _writer = writer;
             }
 
             public void Dispose()
             {
-                if (toRelease != null)
+                if (_toRelease != null)
                 {
-                    if (writer)
+                    if (_writer)
                     {
-                        toRelease.WriterRelease();
+                        _toRelease.WriterRelease();
                     }
                     else
                     {
-                        toRelease.ReaderRelease();
+                        _toRelease.ReaderRelease();
                     }
                 }
             }
