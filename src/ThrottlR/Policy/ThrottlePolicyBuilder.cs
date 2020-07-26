@@ -141,11 +141,6 @@ namespace ThrottlR
                 throw new InvalidOperationException("Resolver unspecified.");
             }
 
-            if ((_policy.GeneralRules?.Count ?? 0) == 0 && (_policy.SpecificRules?.Count ?? 0) == 0)
-            {
-                throw new InvalidOperationException("No rules.");
-            }
-
             return _policy;
         }
     }

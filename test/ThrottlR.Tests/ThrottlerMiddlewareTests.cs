@@ -48,7 +48,7 @@ namespace ThrottlR
             // Arrange
             var (next, _, throttleOptions, middleware, context) = Create();
 
-            var endpoint = CreateEndpoint(new ThrottleMetadata());
+            var endpoint = CreateEndpoint(new EnableThrottle());
             context.SetEndpoint(endpoint);
 
             throttleOptions.AddDefaultPolicy(new ThrottlePolicy { Resolver = null });
@@ -68,7 +68,7 @@ namespace ThrottlR
             // Arrange
             var (next, timeMachine, throttleOptions, middleware, context) = Create();
 
-            var endpoint = CreateEndpoint(new ThrottleMetadata());
+            var endpoint = CreateEndpoint(new EnableThrottle());
             context.SetEndpoint(endpoint);
 
             throttleOptions.AddDefaultPolicy(x => x.WithSafeList("*")
@@ -88,7 +88,7 @@ namespace ThrottlR
             // Arrange
             var (next, timeMachine, throttleOptions, middleware, context) = Create();
 
-            var endpoint = CreateEndpoint(new ThrottleMetadata());
+            var endpoint = CreateEndpoint(new EnableThrottle());
             context.SetEndpoint(endpoint);
 
             throttleOptions.AddDefaultPolicy(x => x.WithGeneralRule(TimeSpan.FromSeconds(1), 1));
@@ -113,7 +113,7 @@ namespace ThrottlR
             // Arrange
             var (next, timeMachine, throttleOptions, middleware, context) = Create();
 
-            var endpoint = CreateEndpoint(new ThrottleMetadata());
+            var endpoint = CreateEndpoint(new EnableThrottle());
             context.SetEndpoint(endpoint);
 
             var cuotaExceededDelegateCalled = false;
@@ -144,7 +144,7 @@ namespace ThrottlR
             // Arrange
             var (next, timeMachine, throttleOptions, middleware, context) = Create();
 
-            var endpoint = CreateEndpoint(new ThrottleMetadata());
+            var endpoint = CreateEndpoint(new EnableThrottle());
             context.SetEndpoint(endpoint);
 
             throttleOptions.AddDefaultPolicy(x => x.WithGeneralRule(TimeSpan.FromSeconds(1), 1));
@@ -177,7 +177,7 @@ namespace ThrottlR
             // Arrange
             var (next, _, _, middleware, context) = Create();
 
-            var endpoint = CreateEndpoint(new ThrottleMetadata(), DisableThrottle.Instance);
+            var endpoint = CreateEndpoint(new EnableThrottle(), DisableThrottle.Instance);
             context.SetEndpoint(endpoint);
 
             await middleware.Invoke(context);
@@ -196,7 +196,7 @@ namespace ThrottlR
                                                    .ApplyPerEndpoint());
 
             // 00:00:00.0
-            var endpoint1 = CreateEndpoint("Endpoint-1", new ThrottleMetadata());
+            var endpoint1 = CreateEndpoint("Endpoint-1", new EnableThrottle());
             context.SetEndpoint(endpoint1);
 
             await middleware.Invoke(context);
@@ -213,9 +213,58 @@ namespace ThrottlR
 
 
             // 00:00:00.0
-            var endpoint2 = CreateEndpoint("Endpoint-2", new ThrottleMetadata());
+            var endpoint2 = CreateEndpoint("Endpoint-2", new EnableThrottle());
             context.SetEndpoint(endpoint2);
 
+            await middleware.Invoke(context);
+
+            Assert.True(next.Called);
+
+
+            // 00:00:00.0
+            next.Called = false;
+            await middleware.Invoke(context);
+
+            Assert.False(next.Called);
+            Assert.Equal(StatusCodes.Status429TooManyRequests, context.Response.StatusCode);
+        }
+
+        [Fact]
+        public async Task ThrottleAttribute_Override_GeneralRule()
+        {
+            // Arrange
+            var (next, timeMachine, throttleOptions, middleware, context) = Create();
+
+            var endpoint = CreateEndpoint(new ThrottleAttribute { PerSecond = 2 });
+            context.SetEndpoint(endpoint);
+
+            throttleOptions.AddDefaultPolicy(x => x.WithGeneralRule(TimeSpan.FromSeconds(1), 1));
+
+            // 00:00:00.0
+            await middleware.Invoke(context);
+
+            Assert.True(next.Called);
+
+
+            // 00:00:00.0
+            next.Called = false;
+            await middleware.Invoke(context);
+
+            Assert.True(next.Called);
+        }
+
+        [Fact]
+        public async Task ThrottleAttribute_With_Policy()
+        {
+            // Arrange
+            var (next, timeMachine, throttleOptions, middleware, context) = Create();
+
+            var endpoint = CreateEndpoint(new ThrottleAttribute { PerSecond = 1, PolicyName = "policy-1" });
+            context.SetEndpoint(endpoint);
+
+            throttleOptions.AddPolicy("policy-1", builder => { });
+
+            // 00:00:00.0
             await middleware.Invoke(context);
 
             Assert.True(next.Called);

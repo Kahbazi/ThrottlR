@@ -1,13 +1,13 @@
 namespace ThrottlR
 {
-    public class ThrottleMetadata : IThrottleMetadata
+    public class EnableThrottle : IThrottleMetadata
     {
-        public ThrottleMetadata()
+        public EnableThrottle()
         {
             
         }
 
-        public ThrottleMetadata(string policyName)
+        public EnableThrottle(string policyName)
         {
             PolicyName = policyName;
         }

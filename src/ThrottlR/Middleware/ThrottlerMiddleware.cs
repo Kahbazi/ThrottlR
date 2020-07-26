@@ -4,14 +4,15 @@ using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace ThrottlR
 {
     public class ThrottlerMiddleware
     {
-        private readonly Func<object, Task> _onResponseStartingDelegate = OnResponseStarting;
+        private static readonly IReadOnlyList<ThrottleRule> _emptyRules = Array.Empty<ThrottleRule>();
+        private static readonly Func<object, Task> _onResponseStartingDelegate = OnResponseStarting;
+
         private readonly RequestDelegate _next;
         private readonly IThrottlerService _throttlerService;
         private readonly IThrottlePolicyProvider _throttlePolicyProvider;
@@ -72,8 +73,28 @@ namespace ThrottlR
                 return;
             }
 
+            IReadOnlyList<ThrottleRule> generalRules;
+            if (throttleMetadata is IThrottleRulesMetadata throttle)
+            {
+                // ThrottleRuleMetadata overrides the general rule
+                generalRules = throttle.GeneralRules;
+            }
+            else
+            {
+                generalRules = policy.GeneralRules;
+            }
 
-            var rules = _throttlerService.GetRules(policy, identity);
+            IReadOnlyList<ThrottleRule> specificRules;
+            if (policy.SpecificRules.TryGetValue(identity, out var specificRulesList))
+            {
+                specificRules = specificRulesList;
+            }
+            else
+            {
+                specificRules = _emptyRules;
+            }
+
+            var rules = _throttlerService.GetRules(generalRules, specificRules);
 
             Dictionary<ThrottleRule, Counter> rulesDict = null;
 
@@ -117,7 +138,6 @@ namespace ThrottlR
 
                 context.Response.OnStarting(_onResponseStartingDelegate, (rule, counter, context));
             }
-
 
             await _next.Invoke(context);
         }

@@ -6,7 +6,7 @@ namespace ThrottlR
 {
     public interface IThrottlerService
     {
-        IEnumerable<ThrottleRule> GetRules(ThrottlePolicy policy, string identity);
+        IEnumerable<ThrottleRule> GetRules(IReadOnlyList<ThrottleRule> generalRules, IReadOnlyList<ThrottleRule> specificRules);
 
         Task<Counter> ProcessRequestAsync(string counterId, ThrottleRule rule, CancellationToken cancellationToken);
     }

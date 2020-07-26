@@ -15,14 +15,15 @@ namespace ThrottlR.Tests
             // Arrange
             var throttlerService = CreateThrottlerService();
 
-            var policy = new ThrottlePolicyBuilder()
-                .WithGeneralRule(TimeSpan.FromSeconds(8), 8)
-                .WithGeneralRule(TimeSpan.FromSeconds(5), 5)
-                .WithGeneralRule(TimeSpan.FromSeconds(2), 2)
-                .Build();
+            var generalRules = new List<ThrottleRule>
+            {
+                new ThrottleRule { TimeWindow = TimeSpan.FromSeconds(8), Quota = 8 },
+                new ThrottleRule { TimeWindow = TimeSpan.FromSeconds(5), Quota = 5 },
+                new ThrottleRule { TimeWindow = TimeSpan.FromSeconds(2), Quota = 2 },
+            };
 
             // Act
-            var rules = throttlerService.GetRules(policy, "identity").ToList();
+            var rules = throttlerService.GetRules(generalRules, Array.Empty<ThrottleRule>()).ToList();
 
             // Assert
             var rule1 = rules[0];
@@ -47,14 +48,15 @@ namespace ThrottlR.Tests
             // Arrange
             var throttlerService = CreateThrottlerService();
 
-            var policy = new ThrottlePolicyBuilder()
-                .WithSpecificRule("identity", TimeSpan.FromSeconds(8), 8)
-                .WithSpecificRule("identity", TimeSpan.FromSeconds(5), 5)
-                .WithSpecificRule("identity", TimeSpan.FromSeconds(2), 2)
-                .Build();
+            var specificRules = new List<ThrottleRule>
+            {
+                new ThrottleRule { TimeWindow = TimeSpan.FromSeconds(8), Quota = 8 },
+                new ThrottleRule { TimeWindow = TimeSpan.FromSeconds(5), Quota = 5 },
+                new ThrottleRule { TimeWindow = TimeSpan.FromSeconds(2), Quota = 2 },
+            };
 
             // Act
-            var rules = throttlerService.GetRules(policy, "identity").ToList();
+            var rules = throttlerService.GetRules(Array.Empty<ThrottleRule>(), specificRules).ToList();
 
             // Assert
             var rule1 = rules[0];
@@ -79,17 +81,23 @@ namespace ThrottlR.Tests
             // Arrange
             var throttlerService = CreateThrottlerService();
 
-            var policy = new ThrottlePolicyBuilder()
-                .WithGeneralRule(TimeSpan.FromSeconds(8), 88)
-                .WithGeneralRule(TimeSpan.FromSeconds(5), 55)
-                .WithGeneralRule(TimeSpan.FromSeconds(2), 22)
-                .WithSpecificRule("identity", TimeSpan.FromSeconds(8), 8)
-                .WithSpecificRule("identity", TimeSpan.FromSeconds(5), 5)
-                .WithSpecificRule("identity", TimeSpan.FromSeconds(2), 2)
-                .Build();
+            var generalRules = new List<ThrottleRule>
+            {
+                new ThrottleRule { TimeWindow = TimeSpan.FromSeconds(8), Quota = 88 },
+                new ThrottleRule { TimeWindow = TimeSpan.FromSeconds(5), Quota = 55 },
+                new ThrottleRule { TimeWindow = TimeSpan.FromSeconds(2), Quota = 22 },
+            };
+
+            var specificRules = new List<ThrottleRule>
+            {
+                new ThrottleRule { TimeWindow = TimeSpan.FromSeconds(8), Quota = 8 },
+                new ThrottleRule { TimeWindow = TimeSpan.FromSeconds(5), Quota = 5 },
+                new ThrottleRule { TimeWindow = TimeSpan.FromSeconds(2), Quota = 2 },
+            };
+
 
             // Act
-            var rules = throttlerService.GetRules(policy, "identity").ToList();
+            var rules = throttlerService.GetRules(generalRules, specificRules).ToList();
 
             // Assert
             var rule1 = rules[0];
@@ -114,15 +122,20 @@ namespace ThrottlR.Tests
             // Arrange
             var throttlerService = CreateThrottlerService();
 
-            var policy = new ThrottlePolicyBuilder()
-                .WithGeneralRule(TimeSpan.FromSeconds(9), 9)
-                .WithGeneralRule(TimeSpan.FromSeconds(7), 7)
-                .WithSpecificRule("identity", TimeSpan.FromSeconds(8), 8)
-                .WithSpecificRule("identity", TimeSpan.FromSeconds(6), 6)
-                .Build();
+            var generalRules = new List<ThrottleRule>
+            {
+                new ThrottleRule { TimeWindow = TimeSpan.FromSeconds(9), Quota = 9 },
+                new ThrottleRule { TimeWindow = TimeSpan.FromSeconds(7), Quota = 7 },
+            };
+
+            var specificRules = new List<ThrottleRule>
+            {
+                new ThrottleRule { TimeWindow = TimeSpan.FromSeconds(8), Quota = 8 },
+                new ThrottleRule { TimeWindow = TimeSpan.FromSeconds(6), Quota = 6 },
+            };
 
             // Act
-            var rules = throttlerService.GetRules(policy, "identity").ToList();
+            var rules = throttlerService.GetRules(generalRules, specificRules).ToList();
 
             // Assert
             var rule1 = rules[0];
@@ -152,16 +165,21 @@ namespace ThrottlR.Tests
             // Arrange
             var throttlerService = CreateThrottlerService();
 
-            var policy = new ThrottlePolicyBuilder()
-                .WithGeneralRule(TimeSpan.FromSeconds(9), 9)
-                .WithGeneralRule(TimeSpan.FromSeconds(7), 7)
-                .WithSpecificRule("identity", TimeSpan.FromSeconds(8), 8)
-                .WithSpecificRule("identity", TimeSpan.FromSeconds(6), 6)
-                .WithSpecificRule("identity", TimeSpan.FromSeconds(5), 5)
-                .Build();
+            var generalRules = new List<ThrottleRule>
+            {
+                new ThrottleRule { TimeWindow = TimeSpan.FromSeconds(9), Quota = 9 },
+                new ThrottleRule { TimeWindow = TimeSpan.FromSeconds(7), Quota = 7 },
+            };
+
+            var specificRules = new List<ThrottleRule>
+            {
+                new ThrottleRule { TimeWindow = TimeSpan.FromSeconds(8), Quota = 8 },
+                new ThrottleRule { TimeWindow = TimeSpan.FromSeconds(6), Quota = 6 },
+                new ThrottleRule { TimeWindow = TimeSpan.FromSeconds(5), Quota = 5 },
+            };
 
             // Act
-            var rules = throttlerService.GetRules(policy, "identity").ToList();
+            var rules = throttlerService.GetRules(generalRules, specificRules).ToList();
 
             // Assert
             var rule1 = rules[0];
@@ -196,16 +214,21 @@ namespace ThrottlR.Tests
             // Arrange
             var throttlerService = CreateThrottlerService();
 
-            var policy = new ThrottlePolicyBuilder()
-                .WithGeneralRule(TimeSpan.FromSeconds(9), 9)
-                .WithGeneralRule(TimeSpan.FromSeconds(7), 7)
-                .WithGeneralRule(TimeSpan.FromSeconds(5), 5)
-                .WithSpecificRule("identity", TimeSpan.FromSeconds(8), 8)
-                .WithSpecificRule("identity", TimeSpan.FromSeconds(6), 6)
-                .Build();
+            var generalRules = new List<ThrottleRule>
+            {
+                new ThrottleRule { TimeWindow = TimeSpan.FromSeconds(9), Quota = 9 },
+                new ThrottleRule { TimeWindow = TimeSpan.FromSeconds(7), Quota = 7 },
+                new ThrottleRule { TimeWindow = TimeSpan.FromSeconds(5), Quota = 5 },
+            };
+
+            var specificRules = new List<ThrottleRule>
+            {
+                new ThrottleRule { TimeWindow = TimeSpan.FromSeconds(8), Quota = 8 },
+                new ThrottleRule { TimeWindow = TimeSpan.FromSeconds(6), Quota = 6 },
+            };
 
             // Act
-            var rules = throttlerService.GetRules(policy, "identity").ToList();
+            var rules = throttlerService.GetRules(generalRules, specificRules).ToList();
 
             // Assert
             var rule1 = rules[0];

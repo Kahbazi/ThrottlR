@@ -13,10 +13,10 @@ namespace MVC
             services.AddControllers();
 
             // Adds throttlR services to service collection
-            services.AddThrottlR(options => 
+            services.AddThrottlR(options =>
             {
                 // Configures the default policy
-                options.AddDefaultPolicy(policy => 
+                options.AddDefaultPolicy(policy =>
                 {
                     // throttling is based on request ip
                     policy.WithIpResolver()
@@ -30,7 +30,7 @@ namespace MVC
 
                         // override general rules for "10.20.10.47" with new rules
                         .WithSpecificRule("10.20.10.47", TimeSpan.FromSeconds(10), 60)
-                        .WithSpecificRule("10.20.10.47", TimeSpan.FromMinutes(1), 600) 
+                        .WithSpecificRule("10.20.10.47", TimeSpan.FromMinutes(1), 600)
                         .WithSpecificRule("10.20.10.47", TimeSpan.FromHours(1), 1000);
                 });
             })
@@ -42,7 +42,7 @@ namespace MVC
             app.UseRouting();
 
             // Adds Throttler middleware to the pipeline
-            app.UseThrottler(); 
+            app.UseThrottler();
 
             app.UseEndpoints(endpoints =>
             {
@@ -53,7 +53,14 @@ namespace MVC
                     return context.Response.WriteAsync("Hello");
                 })
                 // Throttle "/hello" endpoint with default policy
-                .Throttle(); 
+                .Throttle();
+
+                endpoints.MapGet("/farewell", context =>
+                {
+                    return context.Response.WriteAsync("Farewell");
+                })
+                // Override general rules for default policy
+                .Throttle(perSecond: 4);
             });
         }
     }

@@ -6,7 +6,8 @@ namespace ThrottlR
 {
     public class ThrottlerService : IThrottlerService
     {
-        private static readonly IReadOnlyList<ThrottleRule> _emptyRules = new List<ThrottleRule>().AsReadOnly();
+        /// The key-lock used for limiting requests.
+        private static readonly AsyncKeyLock _asyncLock = new AsyncKeyLock();
 
         private readonly ICounterStore _counterStore;
         private readonly ISystemClock _systemClock;
@@ -17,23 +18,18 @@ namespace ThrottlR
             _systemClock = systemClock;
         }
 
-        public IEnumerable<ThrottleRule> GetRules(ThrottlePolicy policy, string identity)
-        {
-            policy.SpecificRules.TryGetValue(identity, out var specificRules);
-
-            var generalRules = policy.GeneralRules;
-            var speceficRules = specificRules ?? _emptyRules;
-        
+        public IEnumerable<ThrottleRule> GetRules(IReadOnlyList<ThrottleRule> generalRules, IReadOnlyList<ThrottleRule> specificRules)
+        {       
             var g = 0;
             var s = 0;
 
             while (true)
             {
-                if (s == speceficRules.Count && g == generalRules.Count)
+                if (s == specificRules.Count && g == generalRules.Count)
                 {
                     break;
                 }
-                else if (s == speceficRules.Count)
+                else if (s == specificRules.Count)
                 {
                     for (; g < generalRules.Count; g++)
                     {
@@ -43,15 +39,15 @@ namespace ThrottlR
                 }
                 else if (g == generalRules.Count)
                 {
-                    for (; s < speceficRules.Count; s++)
+                    for (; s < specificRules.Count; s++)
                     {
-                        yield return speceficRules[s];
+                        yield return specificRules[s];
                     }
                     break;
                 }
 
                 var generalRule = generalRules[g];
-                var speceficRule = speceficRules[s];
+                var speceficRule = specificRules[s];
 
                 if (speceficRule.TimeWindow > generalRule.TimeWindow)
                 {
@@ -72,16 +68,11 @@ namespace ThrottlR
             }
         }
 
-
-        /// The key-lock used for limiting requests.
-        private static readonly AsyncKeyLock _asyncLock = new AsyncKeyLock();
-
         public async Task<Counter> ProcessRequestAsync(string counterId, ThrottleRule rule, CancellationToken cancellationToken)
         {
             Counter counter;
 
-            // serial reads and writes on same key
-            using (await _asyncLock.WriterLockAsync(counterId).ConfigureAwait(false))
+            using (await _asyncLock.WriterLockAsync(counterId))
             {
                 var entry = await _counterStore.GetAsync(counterId, cancellationToken);
 
@@ -105,7 +96,6 @@ namespace ThrottlR
                     counter = new Counter(_systemClock.UtcNow, 1);
                 }
 
-                // stores: id (string) - timestamp (datetime) - total_requests (long)
                 await _counterStore.SetAsync(counterId, counter, rule.TimeWindow, cancellationToken);
             }
 
