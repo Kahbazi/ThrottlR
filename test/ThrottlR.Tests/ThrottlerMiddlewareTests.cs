@@ -43,6 +43,24 @@ namespace ThrottlR
         }
 
         [Fact]
+        public async Task Returns_500_When_There_Is_No_Policy()
+        {
+            // Arrange
+            var (next, _, _, middleware, context) = Create();
+
+            var endpoint = CreateEndpoint(new EnableThrottle());
+            context.SetEndpoint(endpoint);
+
+            // Act
+            await middleware.Invoke(context);
+
+
+            // Assert
+            Assert.False(next.Called);
+            Assert.Equal(StatusCodes.Status500InternalServerError, context.Response.StatusCode);
+        }
+
+        [Fact]
         public async Task Returns_500_When_There_Is_No_Resolver()
         {
             // Arrange

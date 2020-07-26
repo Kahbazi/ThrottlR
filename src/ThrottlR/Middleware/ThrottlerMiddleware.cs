@@ -57,6 +57,12 @@ namespace ThrottlR
             }
 
             var policy = await _throttlePolicyProvider.GetPolicyAsync(throttleMetadata.PolicyName);
+            if (policy == null)
+            {
+                context.Response.StatusCode = StatusCodes.Status500InternalServerError;
+                return;
+            }
+
             if (policy.Resolver == null)
             {
                 context.Response.StatusCode = StatusCodes.Status500InternalServerError;
