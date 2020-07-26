@@ -102,7 +102,7 @@ namespace ThrottlR
 
             var rules = _throttlerService.GetRules(generalRules, specificRules);
 
-            Dictionary<ThrottleRule, Counter> rulesDict = null;
+            (ThrottleRule rule, Counter counter, bool hasBeenSet) longestRule = (default, default, false);
 
             foreach (var rule in rules)
             {
@@ -130,19 +130,13 @@ namespace ThrottlR
                     }
                 }
 
-                (rulesDict ?? new Dictionary<ThrottleRule, Counter>()).Add(rule, counter);
+                longestRule = (rule, counter, true);
             }
 
-
             // set RateLimit headers for the longest period
-            if (rulesDict?.Count > 0)
+            if (longestRule.hasBeenSet)
             {
-                var kvp = rulesDict.OrderByDescending(x => x.Key.TimeWindow).FirstOrDefault();
-
-                var counter = kvp.Value;
-                var rule = kvp.Key;
-
-                context.Response.OnStarting(_onResponseStartingDelegate, (rule, counter, context));
+                context.Response.OnStarting(_onResponseStartingDelegate, (longestRule.rule, longestRule.counter, context));
             }
 
             await _next.Invoke(context);
