@@ -7,9 +7,9 @@ namespace ThrottlR
     {
         public static IpResolver Instance { get; } = new IpResolver();
 
-        public Task<string> ResolveAsync(HttpContext httpContext)
+        public ValueTask<string> ResolveAsync(HttpContext httpContext)
         {
-            return Task.FromResult(httpContext.Connection.RemoteIpAddress?.ToString() ?? string.Empty);
+            return new ValueTask<string>(httpContext.Connection.RemoteIpAddress?.ToString() ?? string.Empty);
         }
     }
 }

@@ -5,19 +5,19 @@ namespace ThrottlR
 {
     public class HostResolver : IResolver
     {
-        private static readonly Task<string> _noHost = Task.FromResult("__NoHost__");
+        private const string NoHost = "__NoHost__";
 
         public static HostResolver Instance { get; } = new HostResolver();
 
-        public Task<string> ResolveAsync(HttpContext httpContext)
+        public ValueTask<string> ResolveAsync(HttpContext httpContext)
         {
             if (httpContext.Request.Host.HasValue)
             {
-                return Task.FromResult(httpContext.Request.Host.Value);
+                return new ValueTask<string>(httpContext.Request.Host.Value);
             }
             else
             {
-                return _noHost;
+                return new ValueTask<string>(NoHost);
             }
         }
     }

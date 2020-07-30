@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Http;
 
 namespace ThrottlR
 {
-
     public class AggregateResolver : IResolver
     {
         private readonly List<IResolver> _resolvers;
@@ -26,7 +25,7 @@ namespace ThrottlR
             _resolvers.Add(resolver);
         }
 
-        public async Task<string> ResolveAsync(HttpContext httpContext)
+        public async ValueTask<string> ResolveAsync(HttpContext httpContext)
         {
             if (_resolvers.Count == 0)
             {

@@ -1,10 +1,10 @@
-﻿using System.Threading.Tasks;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 
 namespace ThrottlR
 {
     public interface IResolver
     {
-        Task<string> ResolveAsync(HttpContext httpContext);
+        ValueTask<string> ResolveAsync(HttpContext httpContext);
     }
 }

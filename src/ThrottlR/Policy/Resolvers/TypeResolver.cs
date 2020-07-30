@@ -14,7 +14,7 @@ namespace ThrottlR
             _serviceProvider = serviceProvider;
         }
 
-        public Task<string> ResolveAsync(HttpContext httpContext)
+        public ValueTask<string> ResolveAsync(HttpContext httpContext)
         {
             return _serviceProvider.GetService<TResolver>().ResolveAsync(httpContext);
         }

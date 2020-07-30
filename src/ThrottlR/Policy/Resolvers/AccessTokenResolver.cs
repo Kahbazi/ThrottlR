@@ -8,9 +8,9 @@ namespace ThrottlR
     {
         public static AccessTokenResolver Instance { get; } = new AccessTokenResolver();
 
-        public Task<string> ResolveAsync(HttpContext httpContext)
+        public ValueTask<string> ResolveAsync(HttpContext httpContext)
         {
-            return httpContext.GetTokenAsync("access_token");
+            return new ValueTask<string>(httpContext.GetTokenAsync("access_token"));
         }
     }
 }
