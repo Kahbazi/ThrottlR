@@ -1,11 +1,11 @@
-﻿namespace ThrottlR
+namespace ThrottlR
 {
     public class SafeListBuilder
     {
         private readonly ThrottlePolicyBuilder _throttlePolicyBuilder;
-        private readonly SafeList _safeList;
+        private readonly SafeListCollection _safeList;
 
-        public SafeListBuilder(ThrottlePolicyBuilder throttlePolicyBuilder, SafeList safeList)
+        public SafeListBuilder(ThrottlePolicyBuilder throttlePolicyBuilder, SafeListCollection safeList)
         {
             _throttlePolicyBuilder = throttlePolicyBuilder;
             _safeList = safeList;
@@ -13,7 +13,7 @@
 
         public ThrottlePolicyBuilder ForResolver(ISafeListResolver resolver, params string[] safe)
         {
-            _safeList.Add(resolver, safe);
+            _safeList.AddSafeList(resolver, safe);
 
             return _throttlePolicyBuilder;
         }
