@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -88,13 +89,13 @@ namespace ThrottlR
 
             var endpoint = CreateEndpoint(new EnableThrottle());
             context.SetEndpoint(endpoint);
+            context.Connection.RemoteIpAddress = new IPAddress(new byte[] { 10, 20, 10, 47 });
 
-            throttleOptions.AddDefaultPolicy(x => x.WithSafeList("*")
+            throttleOptions.AddDefaultPolicy(x => x.SafeList.IP("10.20.10.47")
                                                    .WithGeneralRule(TimeSpan.FromSeconds(1), 1));
 
             // Act
             await middleware.Invoke(context);
-
 
             // Assert
             Assert.True(next.Called);

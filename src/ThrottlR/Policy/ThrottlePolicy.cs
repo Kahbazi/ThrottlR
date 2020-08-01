@@ -7,14 +7,14 @@ namespace ThrottlR
         public ThrottlePolicy()
         {
             GeneralRules = new List<ThrottleRule>();
-            SafeList = new List<string>();
+            SafeList = new SafeList();
             SpecificRules = new Dictionary<string, List<ThrottleRule>>();
             Resolver = NoResolver.Instance;
         }
 
         public List<ThrottleRule> GeneralRules { get; set; }
 
-        public List<string> SafeList { get; set; } = new List<string>();
+        public SafeList SafeList { get; set; }
 
         public Dictionary<string, List<ThrottleRule>> SpecificRules { get; set; }
 

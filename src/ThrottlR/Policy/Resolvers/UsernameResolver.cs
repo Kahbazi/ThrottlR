@@ -1,13 +1,19 @@
 using Microsoft.AspNetCore.Http;
+using System;
 using System.Threading.Tasks;
 
 namespace ThrottlR
 {
-    public class UsernameResolver : IResolver
+    public class UsernameResolver : ISafeListResolver
     {
         private const string Anonymous = "__Anonymous__";
 
         public static UsernameResolver Instance { get; } = new UsernameResolver();
+
+        public bool Matches(string scope, string safe)
+        {
+            return scope.Equals(safe, StringComparison.InvariantCulture);
+        }
 
         public ValueTask<string> ResolveAsync(HttpContext httpContext)
         {
@@ -16,6 +22,7 @@ namespace ThrottlR
             {
                 return new ValueTask<string>(Anonymous);
             }
+
             return new ValueTask<string>(identity.Name);
         }
     }

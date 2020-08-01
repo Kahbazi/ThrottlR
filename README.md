@@ -33,7 +33,7 @@ public void ConfigureServices(IServiceCollection services)
     services.AddThrottlR(options => 
     {
         // Configures the default policy
-        options.AddDefaultPolicy(policy => 
+        options.AddDefaultPolicy(policy =>
         {
             // throttling is based on request ip
             policy.WithIpResolver()
@@ -42,13 +42,17 @@ public void ConfigureServices(IServiceCollection services)
                 .WithGeneralRule(TimeSpan.FromMinutes(1), 30) // 30 requests could be called every 1 minute
                 .WithGeneralRule(TimeSpan.FromHours(1), 500) // 500 requests could be called every 1 hour
 
-                // throttling skips "127.0.0.1" & "::1"
-                .WithSafeList("127.0.0.1", "::1")
-
                 // override general rules for "10.20.10.47" with new rules
                 .WithSpecificRule("10.20.10.47", TimeSpan.FromSeconds(10), 60)
-                .WithSpecificRule("10.20.10.47", TimeSpan.FromMinutes(1), 600) 
-                .WithSpecificRule("10.20.10.47", TimeSpan.FromHours(1), 1000);
+                .WithSpecificRule("10.20.10.47", TimeSpan.FromMinutes(1), 600)
+                .WithSpecificRule("10.20.10.47", TimeSpan.FromHours(1), 1000)
+
+                // throttling skips requests coming from IP : "127.0.0.1" or "::1"
+                .SafeList.IP("127.0.0.1", "::1")
+                // throttling skips requests for User "Admin"
+                .SafeList.User("Admin")
+                // throttling skips requests with Host header "myApi.local"
+                .SafeList.Host("myApi.local");
         });
     })
     .AddInMemoryCounterStore();
@@ -70,6 +74,14 @@ public class ApiController : ControllerBase
         return new string[] { "value1", "value2" };
     }
 
+    // Override General Rule for this action with 2 requests per second
+    [Throttle(PerSecond = 2)]
+    [HttpGet("custom")]
+    public string[] CustomRule()
+    {
+        return new string[] { "value1", "value2" };
+    }
+
     // Disable throttle for this action
     [DisableThrottle]
     [HttpGet("other")]
@@ -87,11 +99,18 @@ Use `Throttle()` extensions method
 ```csharp
 app.UseEndpoints(endpoints =>
 {
-    endpoints.MapGet("/hello", context =>
+    endpoints.MapGet("/greetings", context =>
     {
-        return context.Response.WriteAsync("Hello");
+        return context.Response.WriteAsync("Greetings");
     })
-    // Throttle "/hello" endpoint with default policy
+    // Throttle "/greetings" endpoint with default policy
     .Throttle();
+
+    endpoints.MapGet("/farewell", context =>
+    {
+        return context.Response.WriteAsync("Farewell");
+    })
+    // Throttle "/farewell" endpoint and override general rules for default policy
+    .Throttle(perSecond: 4);
 });
 ```

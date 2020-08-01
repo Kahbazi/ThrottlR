@@ -6,6 +6,11 @@ namespace ThrottlR
 {
     public class AccessTokenResolver : IResolver
     {
+        private AccessTokenResolver()
+        {
+            
+        }
+
         public static AccessTokenResolver Instance { get; } = new AccessTokenResolver();
 
         public ValueTask<string> ResolveAsync(HttpContext httpContext)

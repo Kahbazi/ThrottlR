@@ -23,9 +23,13 @@ namespace Microsoft.Extensions.DependencyInjection
                 {
                     foreach (var policy in options.PolicyMap.Select(kvp => kvp.Value.policy))
                     {
-                        policy.SafeList = policy.SafeList
-                                                .Distinct()
-                                                .ToList();
+                        foreach (var kvp in policy.SafeList)
+                        {
+                            policy.SafeList[kvp.Key] = kvp.Value
+                                                          .Distinct()
+                                                          .ToList();
+                        }
+                        
 
                         policy.GeneralRules = TidyUp(policy.GeneralRules);
                                                     

@@ -3,7 +3,6 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace ThrottlR
@@ -69,11 +68,9 @@ namespace ThrottlR
                 return;
             }
 
-            // compute identity from request
-            var identity = await policy.Resolver.ResolveAsync(context);
-
-            // check safe list
-            if (policy.SafeList.Contains(identity))
+            var scope = await policy.Resolver.ResolveAsync(context);
+            var isSafe = await CheckSafeScopes(context, policy, scope);
+            if (isSafe)
             {
                 await _next.Invoke(context);
                 return;
@@ -91,7 +88,7 @@ namespace ThrottlR
             }
 
             IReadOnlyList<ThrottleRule> specificRules;
-            if (policy.SpecificRules.TryGetValue(identity, out var specificRulesList))
+            if (policy.SpecificRules.TryGetValue(scope, out var specificRulesList))
             {
                 specificRules = specificRulesList;
             }
@@ -106,7 +103,7 @@ namespace ThrottlR
 
             foreach (var rule in rules)
             {
-                var counterId = _counterKeyBuilder.Build(identity, rule, throttleMetadata.PolicyName, endpoint.DisplayName);
+                var counterId = _counterKeyBuilder.Build(scope, rule, throttleMetadata.PolicyName, endpoint.DisplayName);
 
                 // increment counter
                 var counter = await _throttlerService.ProcessRequestAsync(counterId, rule, context.RequestAborted);
@@ -122,7 +119,7 @@ namespace ThrottlR
                     // check if limit is reached
                     if (counter.Count > rule.Quota)
                     {
-                        LogBlockRequest(throttleMetadata, identity, rule, counter);
+                        LogBlockRequest(throttleMetadata, scope, rule, counter);
 
                         await ReturnQuotaExceededResponse(context, rule, counter);
 
@@ -142,7 +139,42 @@ namespace ThrottlR
             await _next.Invoke(context);
         }
 
-        public Task ReturnQuotaExceededResponse(HttpContext httpContext, ThrottleRule rule, Counter counter)
+        private static async Task<bool> CheckSafeScopes(HttpContext context, ThrottlePolicy policy, string scope)
+        {
+            // check safe list
+            foreach (var kvp in policy.SafeList)
+            {
+                var safeList = kvp.Value;
+                if (safeList.Count == 0)
+                {
+                    continue;
+                }
+
+                var resolver = kvp.Key;
+                string safeScope;
+                if (policy.Resolver == resolver)
+                {
+                    safeScope = scope;
+                }
+                else
+                {
+                    safeScope = await resolver.ResolveAsync(context);
+                }
+
+                for (var i = 0; i < safeList.Count; i++)
+                {
+                    var safe = safeList[i];
+                    if (resolver.Matches(safeScope, safe))
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        private Task ReturnQuotaExceededResponse(HttpContext httpContext, ThrottleRule rule, Counter counter)
         {
             var retryAfter = counter.Timestamp + rule.TimeWindow;
 

@@ -8,24 +8,20 @@ namespace ThrottlR
     /// </summary>
     public class ThrottlePolicyBuilder
     {
-        private readonly ThrottlePolicy _policy = new ThrottlePolicy();
+        private readonly ThrottlePolicy _policy;
+
+
+        public ThrottlePolicyBuilder()
+        {
+            _policy = new ThrottlePolicy();
+
+            SafeList = new SafeListBuilder(this, _policy.SafeList);
+        }
 
         /// <summary>
-        /// Adds the specified <paramref name="safeList"/> to the policy.
+        /// 
         /// </summary>
-        /// <param name="safeList">The identities that are allowed.</param>
-        /// <returns>The current policy builder.</returns>
-        public ThrottlePolicyBuilder WithSafeList(params string[] safeList)
-        {
-            _ = safeList ?? throw new ArgumentNullException(nameof(safeList));
-
-            for (var i = 0; i < safeList.Length; i++)
-            {
-                _policy.SafeList.Add(safeList[i]);
-            }
-
-            return this;
-        }
+        public SafeListBuilder SafeList { get; } 
 
         /// <summary>
         /// Adds the specified <paramref name="rules"/> to the policy.

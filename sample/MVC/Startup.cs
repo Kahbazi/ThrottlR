@@ -25,13 +25,17 @@ namespace MVC
                         .WithGeneralRule(TimeSpan.FromMinutes(1), 30) // 30 requests could be called every 1 minute
                         .WithGeneralRule(TimeSpan.FromHours(1), 500) // 500 requests could be called every 1 hour
 
-                        // throttling skips "127.0.0.1" & "::1"
-                        .WithSafeList("127.0.0.1", "::1")
-
                         // override general rules for "10.20.10.47" with new rules
                         .WithSpecificRule("10.20.10.47", TimeSpan.FromSeconds(10), 60)
                         .WithSpecificRule("10.20.10.47", TimeSpan.FromMinutes(1), 600)
-                        .WithSpecificRule("10.20.10.47", TimeSpan.FromHours(1), 1000);
+                        .WithSpecificRule("10.20.10.47", TimeSpan.FromHours(1), 1000)
+
+                        // throttling skips requests coming from IP : "127.0.0.1" or "::1"
+                        .SafeList.IP("127.0.0.1", "::1")
+                        // throttling skips requests for User "Admin"
+                        .SafeList.User("Admin")
+                        // throttling skips requests with Host header "myApi.local"
+                        .SafeList.Host("myApi.local");
                 });
             })
             .AddInMemoryCounterStore();
