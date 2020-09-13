@@ -13,10 +13,13 @@ namespace ThrottlR
             var store = CreateCounterStore();
 
             var timestamp = DateTime.Now;
-            await store.SetAsync("myKey", new Counter(timestamp, 12), null, CancellationToken.None);
 
+            var throttleRule = new ThrottleRule { Quota = 10, TimeWindow = TimeSpan.FromSeconds(10) };
+            var throttlerItem = new ThrottlerItem(throttleRule, "policy", "scope", "endpoint");
 
-            var counter = await store.GetAsync("myKey", CancellationToken.None);
+            await store.SetAsync(throttlerItem, new Counter(timestamp, 12), null, CancellationToken.None);
+
+            var counter = await store.GetAsync(throttlerItem, CancellationToken.None);
 
             Assert.True(counter.HasValue);
             Assert.Equal(12, counter.Value.Count);
@@ -28,37 +31,12 @@ namespace ThrottlR
         {
             var store = CreateCounterStore();
 
-            var counter = await store.GetAsync("myKey", CancellationToken.None);
+            var throttleRule = new ThrottleRule { Quota = 10, TimeWindow = TimeSpan.FromSeconds(10) };
+            var throttlerItem = new ThrottlerItem(throttleRule, "policy", "scope", "endpoint");
+
+            var counter = await store.GetAsync(throttlerItem, CancellationToken.None);
 
             Assert.False(counter.HasValue);
-        }
-
-        [Fact]
-        public async Task Exists_True()
-        {
-            var store = CreateCounterStore();
-
-            var timestamp = DateTime.Now;
-            await store.SetAsync("myKey", new Counter(timestamp, 12), null, CancellationToken.None);
-
-
-            var result = await store.ExistsAsync("myKey", CancellationToken.None);
-
-            Assert.True(result);
-        }
-
-        [Fact]
-        public async Task Exists_False()
-        {
-            var store = CreateCounterStore();
-
-            var timestamp = DateTime.Now;
-            await store.SetAsync("myKey", new Counter(timestamp, 12), null, CancellationToken.None);
-
-
-            var result = await store.ExistsAsync("anotherKey", CancellationToken.None);
-
-            Assert.False(result);
         }
 
         [Fact]
@@ -67,19 +45,17 @@ namespace ThrottlR
             var store = CreateCounterStore();
 
             var timestamp = DateTime.Now;
-            await store.SetAsync("myKey", new Counter(timestamp, 12), null, CancellationToken.None);
 
-            var result = await store.ExistsAsync("myKey", CancellationToken.None);
+            var throttleRule = new ThrottleRule { Quota = 10, TimeWindow = TimeSpan.FromSeconds(10) };
+            var throttlerItem = new ThrottlerItem(throttleRule, "policy", "scope", "endpoint");
 
-            Assert.True(result);
+            await store.SetAsync(throttlerItem, new Counter(timestamp, 12), null, CancellationToken.None);
 
-            await store.RemoveAsync("myKey", CancellationToken.None);
+            await store.RemoveAsync(throttlerItem, CancellationToken.None);
 
-            var counter = await store.GetAsync("myKey", CancellationToken.None);
-            result = await store.ExistsAsync("myKey", CancellationToken.None);
+            var counter = await store.GetAsync(throttlerItem, CancellationToken.None);
 
             Assert.False(counter.HasValue);
-            Assert.False(result);
         }
 
         [Fact]
@@ -89,14 +65,19 @@ namespace ThrottlR
 
             var timestamp1 = DateTime.Now;
             var count1 = 11;
-            await store.SetAsync("myKey1", new Counter(timestamp1, count1), null, CancellationToken.None);
+
+            var throttleRule = new ThrottleRule { Quota = 10, TimeWindow = TimeSpan.FromSeconds(10) };
+            var throttlerItem1 = new ThrottlerItem(throttleRule, "policy", "scope1", "endpoint");
+            var throttlerItem2 = new ThrottlerItem(throttleRule, "policy", "scope2", "endpoint");
+
+            await store.SetAsync(throttlerItem1, new Counter(timestamp1, count1), null, CancellationToken.None);
 
             var timestamp2 = DateTime.Now;
             var count2 = 12;
-            await store.SetAsync("myKey2", new Counter(timestamp2, count2), null, CancellationToken.None);
+            await store.SetAsync(throttlerItem2, new Counter(timestamp2, count2), null, CancellationToken.None);
 
-            var counter1 = await store.GetAsync("myKey1", CancellationToken.None);
-            var counter2 = await store.GetAsync("myKey2", CancellationToken.None);
+            var counter1 = await store.GetAsync(throttlerItem1, CancellationToken.None);
+            var counter2 = await store.GetAsync(throttlerItem2, CancellationToken.None);
 
             Assert.True(counter1.HasValue);
             Assert.Equal(count1, counter1.Value.Count);
@@ -114,16 +95,21 @@ namespace ThrottlR
 
             var timestamp1 = DateTime.Now;
             var count1 = 11;
-            await store.SetAsync("myKey1", new Counter(timestamp1, count1), null, CancellationToken.None);
+
+            var throttleRule = new ThrottleRule { Quota = 10, TimeWindow = TimeSpan.FromSeconds(10) };
+            var throttlerItem1 = new ThrottlerItem(throttleRule, "policy", "scope1", "endpoint");
+            var throttlerItem2 = new ThrottlerItem(throttleRule, "policy", "scope2", "endpoint");
+
+            await store.SetAsync(throttlerItem1, new Counter(timestamp1, count1), null, CancellationToken.None);
 
             var timestamp2 = DateTime.Now;
             var count2 = 12;
-            await store.SetAsync("myKey2", new Counter(timestamp2, count2), null, CancellationToken.None);
+            await store.SetAsync(throttlerItem2, new Counter(timestamp2, count2), null, CancellationToken.None);
 
-            await store.RemoveAsync("myKey1", CancellationToken.None);
-            
-            var counter1 = await store.GetAsync("myKey1", CancellationToken.None);
-            var counter2 = await store.GetAsync("myKey2", CancellationToken.None);
+            await store.RemoveAsync(throttlerItem1, CancellationToken.None);
+
+            var counter1 = await store.GetAsync(throttlerItem1, CancellationToken.None);
+            var counter2 = await store.GetAsync(throttlerItem2, CancellationToken.None);
 
             Assert.False(counter1.HasValue);
 

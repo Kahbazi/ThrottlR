@@ -15,7 +15,6 @@ namespace Microsoft.Extensions.DependencyInjection
             services.TryAddSingleton<IThrottlerService, ThrottlerService>();
             services.TryAddSingleton<IThrottlePolicyProvider, DefaultThrottlePolicyProvider>();
             services.TryAddSingleton<ISystemClock, SystemClock>();
-            services.TryAddSingleton<ICounterKeyBuilder, DefaultCounterKeyBuilder>();
 
             services.AddOptions<ThrottleOptions>()
                 .Configure(configure)

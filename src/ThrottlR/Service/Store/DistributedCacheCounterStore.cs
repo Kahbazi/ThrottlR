@@ -14,7 +14,7 @@ namespace ThrottlR
             _cache = cache;
         }
 
-        public async ValueTask SetAsync(string key, Counter counter, TimeSpan? expirationTime, CancellationToken cancellationToken)
+        public async ValueTask SetAsync(ThrottlerItem throttlerItem, Counter counter, TimeSpan? expirationTime, CancellationToken cancellationToken)
         {
             var options = new DistributedCacheEntryOptions();
 
@@ -23,18 +23,13 @@ namespace ThrottlR
                 options.SetAbsoluteExpiration(expirationTime.Value);
             }
 
+            var key = GenerateThrottlerItemKey(throttlerItem);
             await _cache.SetStringAsync(key, Serialize(counter), options, cancellationToken);
         }
 
-        public async ValueTask<bool> ExistsAsync(string key, CancellationToken cancellationToken)
+        public async ValueTask<Counter?> GetAsync(ThrottlerItem throttlerItem, CancellationToken cancellationToken)
         {
-            var stored = await _cache.GetStringAsync(key, cancellationToken);
-
-            return !string.IsNullOrEmpty(stored);
-        }
-
-        public async ValueTask<Counter?> GetAsync(string key, CancellationToken cancellationToken)
-        {
+            var key = GenerateThrottlerItemKey(throttlerItem);
             var stored = await _cache.GetStringAsync(key, cancellationToken);
 
             if (!string.IsNullOrEmpty(stored))
@@ -43,6 +38,18 @@ namespace ThrottlR
             }
 
             return default;
+        }
+
+        public async ValueTask RemoveAsync(ThrottlerItem throttlerItem, CancellationToken cancellationToken)
+        {
+            var key = GenerateThrottlerItemKey(throttlerItem);
+
+            await _cache.RemoveAsync(key, cancellationToken);
+        }
+
+        public virtual string GenerateThrottlerItemKey(ThrottlerItem throttlerItem)
+        {
+            return throttlerItem.GenerateCounterKey("Throttler");
         }
 
         private static string Serialize(Counter counter)
@@ -65,11 +72,6 @@ namespace ThrottlR
             {
                 return default;
             }
-        }
-
-        public async ValueTask RemoveAsync(string key, CancellationToken cancellationToken)
-        {
-            await _cache.RemoveAsync(key, cancellationToken);
         }
     }
 }

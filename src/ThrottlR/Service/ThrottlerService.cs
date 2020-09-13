@@ -68,13 +68,13 @@ namespace ThrottlR
             }
         }
 
-        public async Task<Counter> ProcessRequestAsync(string counterId, ThrottleRule rule, CancellationToken cancellationToken)
+        public async Task<Counter> ProcessRequestAsync(ThrottlerItem throttlerItem, ThrottleRule rule, CancellationToken cancellationToken)
         {
             Counter counter;
 
-            using (await _asyncLock.WriterLockAsync(counterId))
+            using (await _asyncLock.WriterLockAsync(throttlerItem.GenerateCounterKey()))
             {
-                var entry = await _counterStore.GetAsync(counterId, cancellationToken);
+                var entry = await _counterStore.GetAsync(throttlerItem, cancellationToken);
 
                 if (entry.HasValue)
                 {
@@ -96,7 +96,7 @@ namespace ThrottlR
                     counter = new Counter(_systemClock.UtcNow, 1);
                 }
 
-                await _counterStore.SetAsync(counterId, counter, rule.TimeWindow, cancellationToken);
+                await _counterStore.SetAsync(throttlerItem, counter, rule.TimeWindow, cancellationToken);
             }
 
             return counter;

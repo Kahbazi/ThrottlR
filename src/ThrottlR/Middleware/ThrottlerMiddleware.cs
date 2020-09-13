@@ -15,7 +15,6 @@ namespace ThrottlR
         private readonly RequestDelegate _next;
         private readonly IThrottlerService _throttlerService;
         private readonly IThrottlePolicyProvider _throttlePolicyProvider;
-        private readonly ICounterKeyBuilder _counterKeyBuilder;
         private readonly ThrottleOptions _options;
         private readonly ISystemClock _systemClock;
         private readonly ILogger<ThrottlerMiddleware> _logger;
@@ -23,7 +22,6 @@ namespace ThrottlR
         public ThrottlerMiddleware(RequestDelegate next,
            IThrottlerService throttlerService,
            IThrottlePolicyProvider throttlePolicyProvider,
-           ICounterKeyBuilder counterKeyBuilder,
            IOptions<ThrottleOptions> options,
            ISystemClock systemClock,
            ILogger<ThrottlerMiddleware> logger)
@@ -31,7 +29,6 @@ namespace ThrottlR
             _next = next;
             _throttlerService = throttlerService;
             _throttlePolicyProvider = throttlePolicyProvider;
-            _counterKeyBuilder = counterKeyBuilder;
             _options = options.Value;
             _systemClock = systemClock;
             _logger = logger;
@@ -103,10 +100,10 @@ namespace ThrottlR
 
             foreach (var rule in rules)
             {
-                var counterId = _counterKeyBuilder.Build(scope, rule, throttleMetadata.PolicyName, endpoint.DisplayName);
+                var throttlerItem = new ThrottlerItem(rule, throttleMetadata.PolicyName, scope, endpoint.DisplayName);
 
                 // increment counter
-                var counter = await _throttlerService.ProcessRequestAsync(counterId, rule, context.RequestAborted);
+                var counter = await _throttlerService.ProcessRequestAsync(throttlerItem, rule, context.RequestAborted);
 
                 if (rule.Quota > 0)
                 {
@@ -185,7 +182,6 @@ namespace ThrottlR
             httpContext.Response.StatusCode = StatusCodes.Status429TooManyRequests;
             return _options.OnQuotaExceeded(httpContext, rule, retryAfter);
         }
-
 
         private void LogBlockRequest(IThrottleMetadata rateLimitMetadata, string identity, ThrottleRule rule, Counter rateLimitCounter)
         {

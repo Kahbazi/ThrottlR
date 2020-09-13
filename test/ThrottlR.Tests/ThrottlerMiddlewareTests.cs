@@ -338,8 +338,7 @@ namespace ThrottlR
             var options = Options.Create(throttleOptions);
             var throttlerService = CreateThrottleService(timeMachine);
             var throttlePolicyProvider = new DefaultThrottlePolicyProvider(options);
-            var counterKeyBuilder = new DefaultCounterKeyBuilder();
-            var middleware = new ThrottlerMiddleware(next, throttlerService, throttlePolicyProvider, counterKeyBuilder, options, timeMachine, NullLogger<ThrottlerMiddleware>.Instance);
+            var middleware = new ThrottlerMiddleware(next, throttlerService, throttlePolicyProvider, options, timeMachine, NullLogger<ThrottlerMiddleware>.Instance);
 
             return middleware;
         }

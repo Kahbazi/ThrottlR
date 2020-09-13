@@ -6,9 +6,10 @@ namespace ThrottlR
 {
     public interface ICounterStore
     {
-        ValueTask<bool> ExistsAsync(string key, CancellationToken cancellationToken);
-        ValueTask<Counter?> GetAsync(string key, CancellationToken cancellationToken);
-        ValueTask RemoveAsync(string key, CancellationToken cancellationToken);
-        ValueTask SetAsync(string key, Counter counter, TimeSpan? expirationTime, CancellationToken cancellationToken);
+        ValueTask<Counter?> GetAsync(ThrottlerItem throttlerItem, CancellationToken cancellationToken);
+
+        ValueTask RemoveAsync(ThrottlerItem throttlerItem, CancellationToken cancellationToken);
+
+        ValueTask SetAsync(ThrottlerItem throttlerItem, Counter counter, TimeSpan? expirationTime, CancellationToken cancellationToken);
     }
 }

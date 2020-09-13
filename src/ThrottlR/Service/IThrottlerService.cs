@@ -8,6 +8,6 @@ namespace ThrottlR
     {
         IEnumerable<ThrottleRule> GetRules(IReadOnlyList<ThrottleRule> generalRules, IReadOnlyList<ThrottleRule> specificRules);
 
-        Task<Counter> ProcessRequestAsync(string counterId, ThrottleRule rule, CancellationToken cancellationToken);
+        Task<Counter> ProcessRequestAsync(ThrottlerItem throttlerItem, ThrottleRule rule, CancellationToken cancellationToken);
     }
 }
