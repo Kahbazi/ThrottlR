@@ -1,8 +1,10 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using ThrottlR.Models;
+using ThrottlR.Policy;
 
-namespace ThrottlR
+namespace ThrottlR.Service
 {
     public interface IThrottlerService
     {

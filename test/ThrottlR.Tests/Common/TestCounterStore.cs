@@ -2,8 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using ThrottlR.Models;
+using ThrottlR.Service.Store;
 
-namespace ThrottlR.Tests
+namespace ThrottlR.Common
 {
     public class TestCounterStore : ICounterStore
     {

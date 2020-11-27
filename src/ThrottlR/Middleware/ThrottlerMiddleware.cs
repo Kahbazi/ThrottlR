@@ -1,11 +1,15 @@
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using ThrottlR.Endpoints;
+using ThrottlR.Models;
+using ThrottlR.Policy;
+using ThrottlR.Service;
 
-namespace ThrottlR
+namespace ThrottlR.Middleware
 {
     public class ThrottlerMiddleware
     {

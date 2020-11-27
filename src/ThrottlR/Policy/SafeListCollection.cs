@@ -1,6 +1,7 @@
 using System.Collections.Generic;
+using ThrottlR.Policy.Resolvers;
 
-namespace ThrottlR
+namespace ThrottlR.Policy
 {
     public class SafeListCollection : Dictionary<ISafeListResolver, List<string>>
     {

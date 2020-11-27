@@ -2,7 +2,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 
-namespace ThrottlR
+namespace ThrottlR.Policy.Resolvers
 {
     public class AccessTokenResolver : IResolver
     {

@@ -1,7 +1,7 @@
 using System;
 using System.Net;
 
-namespace ThrottlR
+namespace ThrottlR.Internal
 {
     internal static class IPAddressExtensions
     {

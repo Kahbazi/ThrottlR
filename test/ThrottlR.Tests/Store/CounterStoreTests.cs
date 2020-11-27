@@ -1,9 +1,12 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using ThrottlR.Models;
+using ThrottlR.Policy;
+using ThrottlR.Service.Store;
 using Xunit;
 
-namespace ThrottlR
+namespace ThrottlR.Store
 {
     public abstract class CounterStoreTests
     {

@@ -1,6 +1,6 @@
-using ThrottlR;
+using Microsoft.AspNetCore.Builder;
 
-namespace Microsoft.AspNetCore.Builder
+namespace ThrottlR.Middleware
 {
     public static class ThrottlerApplicationBuilderExtensions
     {

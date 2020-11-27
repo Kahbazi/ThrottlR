@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using ThrottlR.Policy.Resolvers;
 using Xunit;
 
 namespace ThrottlR.Policy

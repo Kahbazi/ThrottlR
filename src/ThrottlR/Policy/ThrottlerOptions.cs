@@ -4,7 +4,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 
-namespace ThrottlR
+namespace ThrottlR.Policy
 {
     public class ThrottleOptions
     {

@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace ThrottlR
+namespace ThrottlR.Policy.Resolvers
 {
     public class TypeResolver<TResolver> : IResolver where TResolver : IResolver
     {

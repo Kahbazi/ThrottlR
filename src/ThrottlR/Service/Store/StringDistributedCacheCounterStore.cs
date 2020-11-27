@@ -1,15 +1,16 @@
-using Microsoft.Extensions.Caching.Distributed;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Caching.Distributed;
+using ThrottlR.Models;
 
-namespace ThrottlR
+namespace ThrottlR.Service.Store
 {
-    public class DistributedCacheCounterStore : ICounterStore
+    public class StringDistributedCacheCounterStore : ICounterStore
     {
         private readonly IDistributedCache _cache;
 
-        public DistributedCacheCounterStore(IDistributedCache cache)
+        public StringDistributedCacheCounterStore(IDistributedCache cache)
         {
             _cache = cache;
         }
@@ -23,16 +24,16 @@ namespace ThrottlR
                 options.SetAbsoluteExpiration(expirationTime.Value);
             }
 
-            var key = GenerateThrottlerItemKey(throttlerItem);
+            var key = throttlerItem.GenerateCounterKey();
             await _cache.SetStringAsync(key, Serialize(counter), options, cancellationToken);
         }
 
         public async ValueTask<Counter?> GetAsync(ThrottlerItem throttlerItem, CancellationToken cancellationToken)
         {
-            var key = GenerateThrottlerItemKey(throttlerItem);
+            var key = throttlerItem.GenerateCounterKey();
             var stored = await _cache.GetStringAsync(key, cancellationToken);
 
-            if (!string.IsNullOrEmpty(stored))
+            if (stored is not null)
             {
                 return Deserialize(stored);
             }
@@ -42,14 +43,8 @@ namespace ThrottlR
 
         public async ValueTask RemoveAsync(ThrottlerItem throttlerItem, CancellationToken cancellationToken)
         {
-            var key = GenerateThrottlerItemKey(throttlerItem);
-
+            var key = throttlerItem.GenerateCounterKey();
             await _cache.RemoveAsync(key, cancellationToken);
-        }
-
-        public virtual string GenerateThrottlerItemKey(ThrottlerItem throttlerItem)
-        {
-            return throttlerItem.GenerateCounterKey("Throttler");
         }
 
         private static string Serialize(Counter counter)
@@ -74,4 +69,5 @@ namespace ThrottlR
             }
         }
     }
+
 }

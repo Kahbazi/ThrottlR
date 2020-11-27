@@ -1,7 +1,7 @@
 using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
 
-namespace ThrottlR
+namespace ThrottlR.Policy
 {
     public class DefaultThrottlePolicyProvider : IThrottlePolicyProvider
     {

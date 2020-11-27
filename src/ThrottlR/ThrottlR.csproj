@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
+    <LangVersion>9.0</LangVersion>
     <PackageDescription>Throttling middleware for ASP.NET Core</PackageDescription>
     <Authors>Kahbazi</Authors>
     <AssemblyName>ThrottlR</AssemblyName>
@@ -17,6 +18,10 @@
 
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Internal\Serializers\" />
   </ItemGroup>
   
 </Project>

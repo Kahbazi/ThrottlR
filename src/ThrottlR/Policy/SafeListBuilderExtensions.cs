@@ -1,4 +1,6 @@
-﻿namespace ThrottlR
+﻿using ThrottlR.Policy.Resolvers;
+
+namespace ThrottlR.Policy
 {
     public static class SafeListBuilderExtensions
     {

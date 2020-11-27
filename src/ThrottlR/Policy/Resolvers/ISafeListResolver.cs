@@ -1,4 +1,4 @@
-﻿namespace ThrottlR
+﻿namespace ThrottlR.Policy.Resolvers
 {
     public interface ISafeListResolver : IResolver
     {

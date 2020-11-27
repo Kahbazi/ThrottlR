@@ -2,7 +2,7 @@ using System;
 using System.Linq;
 using Xunit;
 
-namespace ThrottlR
+namespace ThrottlR.Endpoints
 {
     public class ThrottleAttributeTests
     {

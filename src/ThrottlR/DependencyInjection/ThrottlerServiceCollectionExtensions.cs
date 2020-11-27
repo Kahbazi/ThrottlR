@@ -1,10 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using ThrottlR;
+using ThrottlR.Policy;
+using ThrottlR.Service;
+using ThrottlR.Service.Store;
 
-namespace Microsoft.Extensions.DependencyInjection
+namespace ThrottlR.DependencyInjection
 {
     public static class ThrottlerServiceCollectionExtensions
     {
@@ -25,15 +28,15 @@ namespace Microsoft.Extensions.DependencyInjection
                         foreach (var kvp in policy.SafeList)
                         {
                             policy.SafeList[kvp.Key] = kvp.Value
-                                                          .Distinct()
-                                                          .ToList();
+                                .Distinct()
+                                .ToList();
                         }
-                        
+
 
                         policy.GeneralRules = TidyUp(policy.GeneralRules);
-                                                    
+
                         policy.SpecificRules = policy.SpecificRules
-                                                     .ToDictionary(kvp => kvp.Key, kvp => TidyUp(kvp.Value));
+                            .ToDictionary(kvp => kvp.Key, kvp => TidyUp(kvp.Value));
                     }
                 });
 
@@ -58,9 +61,19 @@ namespace Microsoft.Extensions.DependencyInjection
             return builder;
         }
 
-        public static IThrottlerBuilder AddDistributedCounterStore(this IThrottlerBuilder builder)
+        public static IThrottlerBuilder AddDistributedCounterStore(this IThrottlerBuilder builder,
+            bool useStringSerializer = false)
         {
-            builder.Services.TryAddSingleton<ICounterStore, DistributedCacheCounterStore>();
+            builder.Services.AddDistributedMemoryCache();
+
+            if (useStringSerializer)
+            {
+                builder.Services.TryAddSingleton<ICounterStore, StringDistributedCacheCounterStore>();
+            }
+            else
+            {
+                builder.Services.TryAddSingleton<ICounterStore, BinaryDistributedCacheCounterStore>();
+            }
 
             return builder;
         }

@@ -1,4 +1,4 @@
-namespace ThrottlR
+namespace ThrottlR.Endpoints
 {
     public class EnableThrottle : IThrottleMetadata
     {

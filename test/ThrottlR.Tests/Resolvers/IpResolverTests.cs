@@ -1,6 +1,7 @@
+using ThrottlR.Policy.Resolvers;
 using Xunit;
 
-namespace ThrottlR
+namespace ThrottlR.Resolvers
 {
     public class IpResolverTests
     {

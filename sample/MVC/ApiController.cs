@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using ThrottlR;
+using ThrottlR.Endpoints;
 
 namespace MVC
 {

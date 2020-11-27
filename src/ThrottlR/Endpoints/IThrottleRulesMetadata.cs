@@ -1,6 +1,7 @@
 using System.Collections.Generic;
+using ThrottlR.Policy;
 
-namespace ThrottlR
+namespace ThrottlR.Endpoints
 {
     public interface IThrottleRulesMetadata : IThrottleMetadata
     {

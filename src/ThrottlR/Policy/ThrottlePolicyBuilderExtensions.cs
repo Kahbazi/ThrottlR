@@ -1,6 +1,7 @@
 using System;
+using ThrottlR.Policy.Resolvers;
 
-namespace ThrottlR
+namespace ThrottlR.Policy
 {
     public static class ThrottlePolicyBuilderExtensions
     {

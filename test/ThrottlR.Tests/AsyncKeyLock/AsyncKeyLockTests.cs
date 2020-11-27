@@ -1,15 +1,16 @@
 // Copyright (c) Six Labors and contributors.
 // Licensed under the Apache License, Version 2.0.
 // Thanks to https://github.com/SixLabors/ImageSharp.Web/
+
 using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
 
-namespace ThrottlR.Tests
+namespace ThrottlR.AsyncKeyLock
 {
     public class AsyncKeyLockTests
     {
-        private static readonly AsyncKeyLock _asyncLock = new AsyncKeyLock();
+        private static readonly Internal.AsyncKeyLock.AsyncKeyLock _asyncLock = new Internal.AsyncKeyLock.AsyncKeyLock();
 
         private const string AsyncKey = "ASYNC_KEY";
         private const string AsyncKey1 = "ASYNC_KEY1";

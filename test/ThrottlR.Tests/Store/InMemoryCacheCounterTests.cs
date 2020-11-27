@@ -1,7 +1,8 @@
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
+using ThrottlR.Service.Store;
 
-namespace ThrottlR
+namespace ThrottlR.Store
 {
     public class InMemoryCacheCounterTests : CounterStoreTests
     {

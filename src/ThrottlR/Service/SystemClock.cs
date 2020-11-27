@@ -1,6 +1,6 @@
 using System;
 
-namespace ThrottlR
+namespace ThrottlR.Service
 {
     /// <summary>
     /// Provides access to the normal system clock.

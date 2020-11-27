@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
+using ThrottlR.Common;
+using ThrottlR.Policy;
+using ThrottlR.Service;
 using Xunit;
 
-namespace ThrottlR.Tests
+namespace ThrottlR
 {
     public class ThrottlerServiceTests
     {

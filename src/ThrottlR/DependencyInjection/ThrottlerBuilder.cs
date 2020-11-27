@@ -1,7 +1,7 @@
 using System;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace ThrottlR
+namespace ThrottlR.DependencyInjection
 {
     /// <summary>
     /// Reverse Proxy builder for DI configuration.

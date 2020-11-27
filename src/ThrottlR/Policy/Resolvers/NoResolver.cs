@@ -1,7 +1,7 @@
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 
-namespace ThrottlR
+namespace ThrottlR.Policy.Resolvers
 {
     public class NoResolver : IResolver
     {

@@ -1,7 +1,8 @@
 using System;
 using System.Collections.Generic;
+using ThrottlR.Policy.Resolvers;
 
-namespace ThrottlR
+namespace ThrottlR.Policy
 {
     /// <summary>
     /// Exposes methods to build a policy.

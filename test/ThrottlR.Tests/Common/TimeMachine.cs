@@ -1,6 +1,7 @@
 using System;
+using ThrottlR.Service;
 
-namespace ThrottlR.Tests
+namespace ThrottlR.Common
 {
     public class TimeMachine : ISystemClock
     {

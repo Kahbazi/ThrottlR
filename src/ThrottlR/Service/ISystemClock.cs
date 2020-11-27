@@ -1,6 +1,6 @@
 using System;
 
-namespace ThrottlR
+namespace ThrottlR.Service
 {
     public interface ISystemClock
     {

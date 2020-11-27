@@ -1,19 +1,19 @@
 using System;
 
-namespace ThrottlR
+namespace ThrottlR.Policy
 {
     /// <summary>
     /// Limit the number of acceptable requests in a given time window.
     /// </summary>
-    public class ThrottleRule
+    public struct ThrottleRule
     {
         /// <summary>
-        /// 
+        ///
         /// </summary>
         public TimeSpan TimeWindow { get; set; }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         public double Quota { get; set; }
 

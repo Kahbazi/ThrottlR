@@ -5,7 +5,11 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
-using ThrottlR.Tests;
+using ThrottlR.Common;
+using ThrottlR.Endpoints;
+using ThrottlR.Middleware;
+using ThrottlR.Policy;
+using ThrottlR.Service;
 using Xunit;
 
 namespace ThrottlR

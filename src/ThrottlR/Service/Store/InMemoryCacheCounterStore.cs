@@ -1,9 +1,10 @@
-using Microsoft.Extensions.Caching.Memory;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Caching.Memory;
+using ThrottlR.Models;
 
-namespace ThrottlR
+namespace ThrottlR.Service.Store
 {
     public class InMemoryCacheCounterStore : ICounterStore
     {

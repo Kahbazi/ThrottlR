@@ -2,8 +2,9 @@ using System;
 using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using ThrottlR.Internal;
 
-namespace ThrottlR
+namespace ThrottlR.Policy.Resolvers
 {
     public class IpResolver : ISafeListResolver
     {

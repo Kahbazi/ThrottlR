@@ -1,5 +1,6 @@
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using ThrottlR.Policy.Resolvers;
 using Xunit;
 
 namespace ThrottlR.Resolvers

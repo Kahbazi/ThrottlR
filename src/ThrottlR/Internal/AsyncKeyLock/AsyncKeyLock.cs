@@ -3,11 +3,10 @@
 // Thanks to https://github.com/SixLabors/ImageSharp.Web/
 using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace ThrottlR
+namespace ThrottlR.Internal.AsyncKeyLock
 {
     /// <summary>
     /// The async key lock prevents multiple asynchronous threads acting upon the same object with the given key at the same time.

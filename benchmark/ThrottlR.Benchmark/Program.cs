@@ -10,7 +10,10 @@ using System.Diagnostics;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using CommandLine;
+using ThrottlR.DependencyInjection;
+using ThrottlR.Endpoints;
+using ThrottlR.Middleware;
+using ThrottlR.Policy;
 
 namespace ThrottlR.Benchmark
 {
@@ -65,7 +68,7 @@ namespace ThrottlR.Benchmark
 
             static async Task Greetings(HttpContext context)
             {
-                await Task.Delay(2000);
+                await Task.Delay(10);
                 await context.Response.WriteAsync("Hello World!");
             }
         }

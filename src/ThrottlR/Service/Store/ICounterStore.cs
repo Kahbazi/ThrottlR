@@ -1,8 +1,9 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using ThrottlR.Models;
 
-namespace ThrottlR
+namespace ThrottlR.Service.Store
 {
     public interface ICounterStore
     {
