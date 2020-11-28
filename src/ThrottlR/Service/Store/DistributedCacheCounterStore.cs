@@ -1,13 +1,15 @@
-using Microsoft.Extensions.Caching.Distributed;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Caching.Distributed;
 
 namespace ThrottlR
 {
     public class DistributedCacheCounterStore : ICounterStore
     {
         private readonly IDistributedCache _cache;
+        private const int I32Len = 4;
+        private const int I64Len = 8;
 
         public DistributedCacheCounterStore(IDistributedCache cache)
         {
@@ -23,18 +25,18 @@ namespace ThrottlR
                 options.SetAbsoluteExpiration(expirationTime.Value);
             }
 
-            var key = GenerateThrottlerItemKey(throttlerItem);
-            await _cache.SetStringAsync(key, Serialize(counter), options, cancellationToken);
+            var key = throttlerItem.GenerateCounterKey();
+            await _cache.SetAsync(key, ToBinary(counter).ToArray(), options, cancellationToken);
         }
 
         public async ValueTask<Counter?> GetAsync(ThrottlerItem throttlerItem, CancellationToken cancellationToken)
         {
-            var key = GenerateThrottlerItemKey(throttlerItem);
-            var stored = await _cache.GetStringAsync(key, cancellationToken);
+            var key = throttlerItem.GenerateCounterKey();
+            var stored = await _cache.GetAsync(key, cancellationToken);
 
-            if (!string.IsNullOrEmpty(stored))
+            if (stored != null)
             {
-                return Deserialize(stored);
+                return FromBinary(stored);
             }
 
             return default;
@@ -42,29 +44,27 @@ namespace ThrottlR
 
         public async ValueTask RemoveAsync(ThrottlerItem throttlerItem, CancellationToken cancellationToken)
         {
-            var key = GenerateThrottlerItemKey(throttlerItem);
-
+            var key = throttlerItem.GenerateCounterKey();
             await _cache.RemoveAsync(key, cancellationToken);
         }
 
-        public virtual string GenerateThrottlerItemKey(ThrottlerItem throttlerItem)
+        private static ReadOnlySpan<byte> ToBinary(Counter counter)
         {
-            return throttlerItem.GenerateCounterKey("Throttler");
+
+            var data = new byte[I32Len + I64Len];
+            Buffer.BlockCopy(BitConverter.GetBytes(counter.Count), default, data, default, I32Len);
+            Buffer.BlockCopy(BitConverter.GetBytes(counter.Timestamp.Ticks), default, data, I32Len, I64Len);
+            return data;
         }
 
-        private static string Serialize(Counter counter)
-        {
-            return $"{counter.Timestamp.Ticks},{counter.Count}";
-        }
-
-        private static Counter? Deserialize(string stored)
+        private static Counter? FromBinary(byte[] counterBinaryData)
         {
             try
             {
-                var items = stored.Split(',');
 
-                var timestamp = new DateTime(Convert.ToInt64(items[0]));
-                var count = Convert.ToInt32(items[1]);
+                var counterBinaryDataAsSpan = counterBinaryData.AsSpan();
+                var count = BitConverter.ToInt32(counterBinaryDataAsSpan.Slice(default, I32Len));
+                var timestamp = new DateTime(BitConverter.ToInt64(counterBinaryDataAsSpan.Slice(I32Len, I64Len)));
 
                 return new Counter(timestamp, count);
             }
@@ -74,4 +74,5 @@ namespace ThrottlR
             }
         }
     }
+
 }
