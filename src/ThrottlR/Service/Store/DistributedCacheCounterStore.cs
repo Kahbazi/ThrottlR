@@ -1,7 +1,7 @@
-using Microsoft.Extensions.Caching.Distributed;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Caching.Distributed;
 
 namespace ThrottlR
 {
@@ -24,15 +24,15 @@ namespace ThrottlR
             }
 
             var key = GenerateThrottlerItemKey(throttlerItem);
-            await _cache.SetStringAsync(key, Serialize(counter), options, cancellationToken);
+            await _cache.SetAsync(key, Serialize(counter), options, cancellationToken);
         }
 
         public async ValueTask<Counter?> GetAsync(ThrottlerItem throttlerItem, CancellationToken cancellationToken)
         {
             var key = GenerateThrottlerItemKey(throttlerItem);
-            var stored = await _cache.GetStringAsync(key, cancellationToken);
+            var stored = await _cache.GetAsync(key, cancellationToken);
 
-            if (!string.IsNullOrEmpty(stored))
+            if (stored != null)
             {
                 return Deserialize(stored);
             }
@@ -43,7 +43,6 @@ namespace ThrottlR
         public async ValueTask RemoveAsync(ThrottlerItem throttlerItem, CancellationToken cancellationToken)
         {
             var key = GenerateThrottlerItemKey(throttlerItem);
-
             await _cache.RemoveAsync(key, cancellationToken);
         }
 
@@ -52,20 +51,22 @@ namespace ThrottlR
             return throttlerItem.GenerateCounterKey("Throttler");
         }
 
-        private static string Serialize(Counter counter)
+        private static byte[] Serialize(Counter counter)
         {
-            return $"{counter.Timestamp.Ticks},{counter.Count}";
+            var data = new byte[12];
+
+            // no need to check for success, it only fails on size mismatch which shouldn't happen
+            BitConverter.TryWriteBytes(data.AsSpan(0, 4), counter.Count);
+            BitConverter.TryWriteBytes(data.AsSpan(4, 8), counter.Timestamp.Ticks);
+            return data;
         }
 
-        private static Counter? Deserialize(string stored)
+        private static Counter? Deserialize(byte[] counterBinaryData)
         {
             try
             {
-                var items = stored.Split(',');
-
-                var timestamp = new DateTime(Convert.ToInt64(items[0]));
-                var count = Convert.ToInt32(items[1]);
-
+                var count = BitConverter.ToInt32(counterBinaryData, 0);
+                var timestamp = new DateTime(BitConverter.ToInt64(counterBinaryData, 4));
                 return new Counter(timestamp, count);
             }
             catch
