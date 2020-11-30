@@ -55,7 +55,6 @@ namespace ThrottlR
 
         private static byte[] Serialize(Counter counter)
         {
-
             var data = new byte[I32Len + I64Len];
 
             // no need to check for success, it only fails on size mismatch which shouldn't happen
@@ -68,11 +67,8 @@ namespace ThrottlR
         {
             try
             {
-
-                var counterBinaryDataAsSpan = counterBinaryData.AsSpan();
-                var count = BitConverter.ToInt32(counterBinaryDataAsSpan.Slice(default, I32Len));
-                var timestamp = new DateTime(BitConverter.ToInt64(counterBinaryDataAsSpan.Slice(I32Len, I64Len)));
-
+                var count = BitConverter.ToInt32(counterBinaryData, default);
+                var timestamp = new DateTime(BitConverter.ToInt64(counterBinaryData, I32Len));
                 return new Counter(timestamp, count);
             }
             catch
