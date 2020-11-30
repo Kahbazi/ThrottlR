@@ -8,8 +8,6 @@ namespace ThrottlR
     public class DistributedCacheCounterStore : ICounterStore
     {
         private readonly IDistributedCache _cache;
-        private const int I32Len = 4;
-        private const int I64Len = 8;
 
         public DistributedCacheCounterStore(IDistributedCache cache)
         {
@@ -55,11 +53,11 @@ namespace ThrottlR
 
         private static byte[] Serialize(Counter counter)
         {
-            var data = new byte[I32Len + I64Len];
+            var data = new byte[12];
 
             // no need to check for success, it only fails on size mismatch which shouldn't happen
-            BitConverter.TryWriteBytes(data.AsSpan(default, I32Len), counter.Count);
-            BitConverter.TryWriteBytes(data.AsSpan(I32Len, I64Len), counter.Timestamp.Ticks);
+            BitConverter.TryWriteBytes(data.AsSpan(0, 4), counter.Count);
+            BitConverter.TryWriteBytes(data.AsSpan(4, 8), counter.Timestamp.Ticks);
             return data;
         }
 
@@ -67,8 +65,8 @@ namespace ThrottlR
         {
             try
             {
-                var count = BitConverter.ToInt32(counterBinaryData, default);
-                var timestamp = new DateTime(BitConverter.ToInt64(counterBinaryData, I32Len));
+                var count = BitConverter.ToInt32(counterBinaryData, 0);
+                var timestamp = new DateTime(BitConverter.ToInt64(counterBinaryData, 4));
                 return new Counter(timestamp, count);
             }
             catch
@@ -77,5 +75,4 @@ namespace ThrottlR
             }
         }
     }
-
 }
